@@ -8,7 +8,7 @@
 A little program to remind you of upcoming events / unfinished tasks.
 
 ## Dependencies
-* python 3.6
+* python 3.6 (pathlib, pickle)
 
 ## Installation
 Currently it only supports manual installation, sorry! 
@@ -22,9 +22,9 @@ $ cd pyTodo && cp todo ~/.local/bin/todo
 ## Usage
 ```
 $ todo                        # List all items.
-$ todo -a               	  # Add an item.
+$ todo -a                     # Add an item.
 $ todo -r <index>             # Remove an existing item.
-$ todo -h               	  # Display help message.
+$ todo -h                     # Display help message.
 $ todo -v                     # Display version info.
 ```
 
