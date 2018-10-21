@@ -53,7 +53,7 @@ if __name__ == '__main__':
     try:
         with open(datafile_location + datafile_name, 'rb') as f:
             items = pickle.load(f)
-    except Exception as e:
+    except:
         print("Initialized " + datafile_name  + " at " + datafile_location + datafile_name)
 
     if len(sys.argv) <= 1:
@@ -70,8 +70,7 @@ if __name__ == '__main__':
             try:
                 remove_item(int(sys.argv[2]))
                 print("Removed item " + sys.argv[2])
-            except Exception as e:
-                print(e)
+            except:
                 print("Item does not exist.")
         else:
             print_usage()
