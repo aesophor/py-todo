@@ -11,7 +11,7 @@ class TodoItem:
     def __str__(self):
         return self.title + " (" + self.desc + ")" if len(self.desc) > 0 else self.title
 
-datafile_location = str(Path.home()) + '/.local/share/pyTodo/'
+datafile_location = str(Path.home()) + '/.local/share/py-todo/'
 datafile_name = 'todo.dat'
 items = []
 

@@ -18,6 +18,7 @@ $ git clone https://github.com/aesophor/py-todo.git
 $ cd py-todo && cp todo ~/.local/bin/todo
 ```
 
+Todo list items are saved in ~/.local/share/py-todo/todo.dat by default.
 
 ## Usage
 ```
