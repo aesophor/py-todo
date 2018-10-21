@@ -1,6 +1,6 @@
 <div align="center">
 <h3>PYTODO</h3>
-<img src="https://github.com/aesophor/pyTodo/raw/master/assets/scrot.png">
+<img src="https://github.com/aesophor/py-todo/raw/master/assets/scrot.png">
 
 </div>
 
@@ -14,8 +14,8 @@ A little program to remind you of upcoming events / unfinished tasks.
 Currently it only supports manual installation, sorry! 
 * Manual Installation
 ```
-$ git clone https://github.com/aesophor/pyTodo.git
-$ cd pyTodo && cp todo ~/.local/bin/todo
+$ git clone https://github.com/aesophor/py-todo.git
+$ cd py-todo && cp todo ~/.local/bin/todo
 ```
 
 
