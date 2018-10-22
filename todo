@@ -12,19 +12,17 @@ class TodoItem:
         if self.exp_date is None:
             return self.title
         else:
-            output = self.title
-            remaining_time = (self.exp_date - datetime.now())
-            days_left = remaining_time.days
-            seconds_left = remaining_time.seconds
+            days_left = (self.exp_date - datetime.now()).days
+            
             if days_left > 0:
-                output += " (" + str(days_left) + " "
-                output += "days" if days_left >= 2 else "day"
-                output += " left)"
+                return self.title + " ({days_left} day{s} left)".format(days_left=days_left, s="s" if days_left >= 2 else "")
             elif days_left == 0:
-                output += " (Tomorrow)" if seconds_left / 24 > 0 else " (Today)"
+                return self.title + " (Tomorrow)"
+            elif days_left == -1:
+                return self.title + " (Today)"
             else:
-                output += " (DUE!)"
-            return output
+                return self.title + " (DUE!)"
+
 
 datafile_location = str(Path.home()) + '/.local/share/py-todo/'
 datafile_name = 'todo.dat'
@@ -38,10 +36,7 @@ def remove_item(index: int):
 
 def list_items():
     if len(items) > 0:
-        notice = "You have " + str(len(items)) + " "
-        notice += "items" if len(items) >= 2 else "item"
-        notice += " left on the reminder!"
-        print(notice)
+        print("You have {item_count} item{s} left on the reminder!".format(item_count=len(items), s="s" if len(items) >= 2 else ""))
         index = 0
         for item in items:
             print(str(index) + ") " + item.__str__())
@@ -58,7 +53,7 @@ def print_usage():
     print("-v --version             -- Displays version info.")
 
 def print_version():
-    print("pyTodo 0.1")
+    print("py-todo 0.2")
     print("Copyright (C) 2018 Marco Wang")
     print("")
     print("This is free software, see the source for copying conditions.  There is NO")
