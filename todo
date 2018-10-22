@@ -1,29 +1,47 @@
 #!/usr/bin/env python3
-
 import sys
 import pickle
 from pathlib import Path
+from datetime import datetime
 
 class TodoItem:
-    def __init__(self, title, desc):
+    def __init__(self, title, exp_date=None):
         self.title = title
-        self.desc = desc
+        self.exp_date = exp_date
     def __str__(self):
-        return self.title + " (" + self.desc + ")" if len(self.desc) > 0 else self.title
+        if self.exp_date is None:
+            return self.title
+        else:
+            output = self.title
+            remaining_time = (self.exp_date - datetime.now())
+            days_left = remaining_time.days
+            seconds_left = remaining_time.seconds
+            if days_left > 0:
+                output += " (" + str(days_left) + " "
+                output += "days" if days_left >= 2 else "day"
+                output += " left)"
+            elif days_left == 0:
+                output += " (Tomorrow)" if seconds_left / 24 > 0 else " (Today)"
+            else:
+                output += " (DUE!)"
+            return output
 
 datafile_location = str(Path.home()) + '/.local/share/py-todo/'
 datafile_name = 'todo.dat'
 items = []
 
-def add_item(title: str, desc: str):
-    items.append(TodoItem(title, desc))
+def add_item(title: str, exp_date: datetime):
+    items.append(TodoItem(title, exp_date))
 
 def remove_item(index: int):
     del items[index]
 
 def list_items():
     if len(items) > 0:
-        print("You still have " + str(len(items)) + " items left!")
+        notice = "You have " + str(len(items)) + " "
+        notice += "items" if len(items) >= 2 else "item"
+        notice += " left on the reminder!"
+        print(notice)
         index = 0
         for item in items:
             print(str(index) + ") " + item.__str__())
@@ -62,14 +80,20 @@ if __name__ == '__main__':
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
         print("Adding an item:")
         title = input("Title: ")
-        desc = input("Description: ")
-        add_item(title, desc)
+        exp_date = input("Expiry date (YYYY/MM/DD): ")
+        if exp_date != '':
+            exp_date = datetime(*map(int, exp_date.split('/')))
+        else:
+            exp_date = None
+        add_item(title, exp_date)
+        list_items()
         
     elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
         if len(sys.argv) >= 3:
             try:
                 remove_item(int(sys.argv[2]))
-                print("Removed item " + sys.argv[2])
+                print("Removed item " + sys.argv[2] + "\n")
+                list_items()
             except:
                 print("Item does not exist.")
         else:
