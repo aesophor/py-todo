@@ -61,25 +61,33 @@ def print_version():
 
 
 if __name__ == '__main__':
+    # mkdir -p on datafile_location.
     Path(datafile_location).mkdir(parents=True, exist_ok=True)
 
+    # Try to unpickle todo list from the file.
     try:
         with open(datafile_location + datafile_name, 'rb') as f:
             items = pickle.load(f)
     except:
-        print("Initialized " + datafile_name  + " at " + datafile_location + datafile_name)
+        pass
 
+    # Command line argument parsing.
     if len(sys.argv) <= 1:
         list_items()
         
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
-        print("Adding an item:")
         title = input("Title: ")
-        exp_date = input("Expiry date (YYYY/MM/DD): ")
-        if exp_date != '':
-            exp_date = datetime(*map(int, exp_date.split('/')))
-        else:
+        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
+        
+        if exp_date == '':
             exp_date = None
+        else:
+            try:
+                exp_date = datetime(*map(int, exp_date.split('/')))
+            except:
+                print("An error occurred while parsing your date.")
+                sys.exit()
+        
         add_item(title, exp_date)
         list_items()
         
@@ -103,5 +111,6 @@ if __name__ == '__main__':
     else:
         print_usage()
 
+    # Write all changes back to the file.
     with open(datafile_location + datafile_name, 'wb') as f:
         pickle.dump(items, f)
