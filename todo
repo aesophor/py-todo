@@ -3,6 +3,7 @@
 
 import sys
 import pickle
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -10,13 +11,13 @@ class TodoItem:
     def __init__(self, title, exp_date=None):
         self.title = title
         self.exp_date = exp_date
-        
+
     def __str__(self):
         if self.exp_date is None:
             return self.title
         else:
             days_left = (self.exp_date - datetime.now()).days
-            
+
             if days_left > 0:
                 return self.title + " ({days_left} day{s} left)".format(
                     days_left=days_left, s="s" if days_left >= 2 else "")
@@ -50,12 +51,13 @@ def list_items():
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                 -- Adds a new item.")
-    print("-r --remove <index>      -- Removes an item by index.")
-    print("-l --list                -- Lists all items.")
+    print("-a --add                   -- Adds a new item.")
+    print("-r --remove <index>        -- Removes an item by index.")
+    print("-l --list                  -- Lists all items.")
+    print("-org --orgfile <filename>  -- Add org file TODOs.")
     print()
-    print("-h --help                -- Displays help message.")
-    print("-v --version             -- Displays version info.")
+    print("-h --help                  -- Displays help message.")
+    print("-v --version               -- Displays version info.")
 
 def print_version():
     print("py-todo 0.2")
@@ -79,23 +81,58 @@ if __name__ == '__main__':
     # Command line argument parsing.
     if len(sys.argv) <= 1:
         list_items()
-        
+
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
         title = input("Title: ")
         exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
-        
+
         if exp_date == '':
             exp_date = None
         else:
             try:
                 exp_date = datetime(*map(int, exp_date.split('/')))
+                print(exp_date)
             except:
                 print("An error occurred while parsing your date.")
                 sys.exit()
-        
+
         add_item(title, exp_date)
         list_items()
-        
+
+    elif sys.argv[1] == '-org' or sys.argv[1] == '--orgfile':
+        keywords = []
+        filename = str(sys.argv[2])
+        # Open the orgfile
+        with open(filename, 'r') as f:
+            content = f.readlines()
+            for line in content:
+                # Search for the header to obtain the keywords
+                if "#+TODO:" in line:
+                    todos = line.replace('#+TODO: ', '')
+                    for word in todos.split():
+                        if word != '|':
+                            keywords.append(word)
+                else:
+                    for word in keywords:
+                        # Search in each line and format if match
+                        if word in line and '*' in line:
+                            line = line.replace('*', '')
+                            line = line.replace(word, '')
+                            line = line.replace('\n', '')
+                            if ':' in line:
+                                line, dos = line.split(' :')
+                            if '<' in line:
+                                line, date = line.split('<')
+                                match = re.search('\d{4}-\d{2}-\d{2}', date)
+                                date = match.group(0)
+                                date = datetime(*map(int, date.split('-')))
+                            else:
+                                date = None
+                            title = line.lstrip()
+                            exp_date = date
+                            add_item(title, exp_date)
+        list_items()
+
     elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
         if len(sys.argv) >= 3:
             try:
@@ -106,10 +143,10 @@ if __name__ == '__main__':
                 print("Item does not exist.")
         else:
             print_usage()
-        
+
     elif sys.argv[1] == '-l' or sys.argv[1] == '--list':
         list_items()
-        
+
     elif sys.argv[1] == '-v' or sys.argv[1] == '--version':
         print_version()
 
