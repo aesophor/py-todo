@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from datetime import datetime
 
+
 class TodoItem:
     def __init__(self, title, exp_date=None):
         self.title = title
@@ -33,11 +34,14 @@ datafile_location = str(Path.home()) + '/.local/share/py-todo/'
 datafile_name = 'todo.dat'
 items = []
 
+
 def add_item(title: str, exp_date: datetime):
     items.append(TodoItem(title, exp_date))
 
+
 def remove_item(index: int):
     del items[index]
+
 
 def list_items():
     if len(items) > 0:
@@ -47,6 +51,7 @@ def list_items():
         for item in items:
             print(str(index) + ") " + item.__str__())
             index += 1
+
 
 def print_usage():
     print("")
@@ -58,6 +63,7 @@ def print_usage():
     print()
     print("-h --help                  -- Displays help message.")
     print("-v --version               -- Displays version info.")
+
 
 def print_version():
     print("py-todo 0.2")
@@ -105,7 +111,7 @@ if __name__ == '__main__':
         # Open the orgfile
         with open(filename, 'r') as f:
             content = f.readlines()
-            for line in content:
+            for index, line in enumerate(content):
                 # Search for the header to obtain the keywords
                 if "#+TODO:" in line:
                     todos = line.replace('#+TODO: ', '')
@@ -113,24 +119,32 @@ if __name__ == '__main__':
                         if word != '|':
                             keywords.append(word)
                 else:
+                    if not keywords:
+                        keywords.append('TODO')
+                        keywords.append('DONE')
                     for word in keywords:
                         # Search in each line and format if match
                         if word in line and '*' in line:
-                            line = line.replace('*', '')
+                            line = line.strip('*')
                             line = line.replace(word, '')
-                            line = line.replace('\n', '')
-                            if ':' in line:
-                                line, dos = line.split(' :')
-                            if '<' in line:
-                                line, date = line.split('<')
-                                match = re.search('\d{4}-\d{2}-\d{2}', date)
-                                date = match.group(0)
-                                date = datetime(*map(int, date.split('-')))
-                            else:
+                            line = line.strip()
+                            title = line
+                            try:
+                                if ': <' in content[index + 1]:
+                                    line, date = content[index + 1].split('<')
+                                    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
+                                    date = match.group(0)
+                                    date = datetime(*map(int, date.split('-')))
+                                    exp_date = date
+                                    add_item(title, exp_date)
+                                else:
+                                    date = None
+                                    exp_date = date
+                                    add_item(title, exp_date)
+                            except IndexError:
                                 date = None
-                            title = line.lstrip()
-                            exp_date = date
-                            add_item(title, exp_date)
+                                exp_date = date
+                                add_item(title, exp_date)
         list_items()
 
     elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
