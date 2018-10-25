@@ -37,6 +37,7 @@ $ todo -a                     # Add an item.
 $ todo -r <index>             # Remove an existing item.
 $ todo -h                     # Display help message.
 $ todo -v                     # Display version info.
+$ todo -org <filename>        # Adds TODOs from Emacs org mode
 ```
 
 ## License
