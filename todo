@@ -6,6 +6,7 @@ import pickle
 import re
 from pathlib import Path
 from datetime import datetime
+from datetime import date
 
 
 class TodoItem:
@@ -18,10 +19,22 @@ class TodoItem:
             return self.title
         else:
             days_left = (self.exp_date - datetime.now()).days
+            weekDay   = datetime.isoweekday(self.exp_date)
+            
+            thisDaysOfTheWeek = ["", "This Monday", "This Tuesday", "This Wednesday", "This Thursday", "This Friday", "This Saturday", "This Sunday"]
+            #   Doing this because a split and insert here would be ugly
+            nextDaysOfTheWeek = ["", "Next Monday", "Next Tuesday", "Next Wednesday", "Next Thursday", "Next Friday", "Next Saturday", "Next Sunday"]
+            
 
-            if days_left > 0:
-                return self.title + " ({days_left} day{s} left)".format(
-                    days_left=days_left, s="s" if days_left >= 2 else "")
+            if days_left > 12:
+                return self.title + " ({days_left} days left.)".format(
+                    days_left=days_left)
+
+            elif days_left > 6 and days_left <= 12:
+                return self.title +" ({dayOfTheWeek})".format(dayOfTheWeek = nextDaysOfTheWeek[weekDay])
+            elif days_left > 0 and days_left <= 6:
+                return self.title +" ({dayOfTheWeek})".format(dayOfTheWeek = thisDaysOfTheWeek[weekDay])
+            
             elif days_left == 0:
                 return self.title + " (Tomorrow)"
             elif days_left == -1:
@@ -42,6 +55,7 @@ def add_item(title: str, exp_date: datetime):
 def remove_item(index: int):
     del items[index]
 
+
 def list_items():
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
@@ -51,18 +65,17 @@ def list_items():
             print(str(index) + ") " + item.__str__())
             index += 1
 
-
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                   -- Adds a new item. With Title prompt")
-    print("-a --add <item>            -- Adds a new item. Without Title prompt")
-    print("-r --remove <index>        -- Removes an item by index.")
-    print("-l --list                  -- Lists all items.")
-    print("-org --orgfile <filename>  -- Add org file TODOs.")
-    print()
-    print("-h --help                  -- Displays help message.")
-    print("-v --version               -- Displays version info.")
+    print("-a --add <title>                -- Adds a new item. or adds it with a title if provided")
+    print("-r --remove <index>             -- Removes an item by index.")
+    print("-c --clear <index 1> <index 2>  -- Clears all items between the two indexes.")
+    print("-l --list                       -- Lists all items.")
+    print("-org --orgfile <filename>       -- Add org file TODOs.")
+    print("")
+    print("-h --help                       -- Displays help message.")
+    print("-v --version                    -- Displays version info.")
 
 
 def print_version():
@@ -93,10 +106,19 @@ if __name__ == '__main__':
             title = sys.argv[2]
         else:
             title = input("Title: ")
+        
+        exp_date = input("Expiry date (e.g., YYYY/MM/DD, 1d) (Optional): ")
 
-        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
         if exp_date == '':
             exp_date = None
+
+        elif "d" in exp_date:
+            d = exp_date.split('d')
+            integerD = int(d[0])
+            expDate = datetime.today().toordinal() + integerD
+            exp_date = date.fromordinal(expDate)
+            exp_date = datetime.combine(exp_date, datetime.min.time())
+        
         else:
             try:
                 exp_date = datetime(*map(int, exp_date.split('/')))
@@ -134,22 +156,23 @@ if __name__ == '__main__':
                             title = line
                             try:
                                 if ': <' in content[index + 1]:
-                                    line, date = content[index + 1].split('<')
-                                    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
-                                    date = match.group(0)
-                                    date = datetime(*map(int, date.split('-')))
-                                    exp_date = date
+                                    line, dat = content[index + 1].split('<')
+                                    match = re.search(r'\d{4}-\d{2}-\d{2}', dat)
+                                    dat = match.group(0)
+                                    dat = datetime(*map(int, dat.split('-')))
+                                    exp_date = dat
                                     add_item(title, exp_date)
                                 else:
-                                    date = None
-                                    exp_date = date
+                                    dat = None
+                                    exp_date = dat
                                     add_item(title, exp_date)
                             except IndexError:
-                                date = None
-                                exp_date = date
+                                dat = None
+                                exp_date = dat
                                 add_item(title, exp_date)
         list_items()
 
+    #   Removing notes
     elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
         if len(sys.argv) >= 3:
             try:
@@ -161,6 +184,26 @@ if __name__ == '__main__':
         else:
             print_usage()
 
+    elif sys.argv[1] == '-c' or sys.argv[1] == '--clear':
+        if len(sys.argv) <= 2:
+            for i in range(len(items) - 1):
+                del items[i]
+
+        if len(sys.argv) > 2 and len(sys.argv) <= 4:
+            arg1 = int(sys.argv[2])
+            arg2 = int(sys.argv[3]) + 1
+            
+            try:
+                for i in range(arg1 , arg2):
+                    print("Deleted item {item}".format(item = items[i]))
+                    del items[i]
+                
+            except:
+                print("Item doesn't exist.")
+                print_usage()
+        else:
+            print_usage()
+
     elif sys.argv[1] == '-l' or sys.argv[1] == '--list':
         list_items()
 
@@ -169,7 +212,6 @@ if __name__ == '__main__':
 
     else:
         print_usage()
-
     # Write all changes back to the file.
     with open(datafile_location + datafile_name, 'wb') as f:
         pickle.dump(items, f)
