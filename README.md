@@ -57,12 +57,12 @@ detail_mode = true / false
 week_start_day = Sun / Mon
 ```
 
-With detail_mode set to true:
+With **detail_mode** set to **true**:
 ```
 Discrete Mathematics Exam (Next Wednesday; 5 days left)
 ```
 
-With detail_mode set to false:
+With **detail_mode** set to **false**:
 ```
 Discrete Mathematics Exam (5 days left)
 ```
