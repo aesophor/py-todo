@@ -51,7 +51,7 @@ $ todo -org <filename>               # Adds TODOs from Emacs org mode
 ```
 
 ## Configuration
-User configuration is totally optional. Edit ~/.config/py-todo/config:
+This part is totally optional. Edit ~/.config/py-todo/config:
 ```
 detail_mode = true / false
 week_start_day = Sun / Mon
