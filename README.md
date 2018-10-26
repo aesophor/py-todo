@@ -41,13 +41,30 @@ $ cd py-todo && cp todo /usr/local/bin/
 
 ## Usage
 ```
-$ todo                        # List all items.
-$ todo -a                     # Add an item. (with Title prompt)
-$ todo -a <todo item>         # Add an item. (without Title prompt)
-$ todo -r <index>             # Remove an existing item.
-$ todo -h                     # Display help message.
-$ todo -v                     # Display version info.
-$ todo -org <filename>        # Adds TODOs from Emacs org mode
+$ todo                               # List all items.
+$ todo -a                            # Add an item. (with Title / Expiry Date prompt)
+$ todo -a <todo item> <expiry date>  # Add an item. (without Title / Expiry Date prompt)
+$ todo -r <indices>                  # Remove one or more items.
+$ todo -h                            # Display help message.
+$ todo -v                            # Display version info.
+$ todo -org <filename>               # Adds TODOs from Emacs org mode
+```
+
+## Configuration
+User configuration is totally optional. Edit ~/.config/py-todo/config:
+```
+detail_mode = true / false
+week_start_day = Sun / Mon
+```
+
+With detail_mode set to true:
+```
+Book (Next Wednesday; 5 days left)
+```
+
+With detail_mode set to false:
+```
+Book (5 days left)
 ```
 
 ## License
