@@ -13,10 +13,13 @@ putting off important shit.
 
 Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo/todo.dat by default.
 
+
 ## Dependencies
+* python 3.6 (pathlib, pickle)
+
+## Supported Platforms
 * Linux
 * OSX (tested on 10.14 Mojave)
-* python 3.6 (pathlib, pickle)
 
 ## Installation
 * Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
@@ -29,6 +32,7 @@ yaourt -S py-todo
 $ git clone https://github.com/aesophor/py-todo.git
 $ cd py-todo && sudo cp todo /usr/bin/todo
 ```
+
 * Manual Installation (OSX)
 ```
 $ git clone https://github.com/aesophor/py-todo.git
