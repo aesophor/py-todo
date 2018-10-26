@@ -9,65 +9,74 @@ from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
 
-
+""" Define config and data file locations """
 config_location = str(Path.home()) + '/.config/py-todo/'
+datafile_location = str(Path.home()) + '/.local/share/py-todo/'
+""" Define config and data file names """
 config_name = 'config'
+datafile_name = 'todo.dat'
+
+""" Create dictionary representing the config file """
 config = {
     'detail_mode': 'false',
     'week_start_day': 'Sun'
 }
 
-datafile_location = str(Path.home()) + '/.local/share/py-todo/'
-datafile_name = 'todo.dat'
-items = []
+items = []  # List of TodoItems, to be stored later in the datafile
 
 
 class TodoItem:
+    """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
     def __init__(self, title, exp_date=None):
         self.title = title
-        self.exp_date = exp_date
+        self.exp_date = exp_date  # Expiration date, type: datetime
 
     def __str__(self):
         if self.exp_date is None:
             return self.title
+
+        # Set the amount of days left as the timedelta from today to the expiration date, in days.
+        days_left = (self.exp_date - datetime.today()).days + 1
+        
+        if days_left == 0:
+            return self.title + " (Today)"  # Annotate as the current day
+        elif days_left == 1:
+            return self.title + " (Tomorrow)"  # Annotate as tomorrow
+        elif days_left > 1:
+            # If in detail mode, annotate more explicitly (i.e. give the due weekday)
+            if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
+                week_start_day = 5
+                if 'week_start_day' in config:
+                    week_start_day_str = config['week_start_day'].lower()
+                    if week_start_day_str in ['sun', 'mon']:
+                        week_start_day = 5 if week_start_day_str == 'sun' else 6
+                days_to_next_week = week_start_day - datetime.today().weekday() # Monday = 0, ..., Sunday = 6
+                weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
+                
+                if weeks_left == 0:
+                    return self.title + " (This {weekday}; {days_left} days left)".format(
+                        weekday=self.exp_date.strftime("%A"), days_left=days_left)
+                elif weeks_left == 1:
+                    return self.title + " (Next {weekday}; {days_left} days left)".format(
+                        weekday=self.exp_date.strftime("%A"), days_left=days_left)
+            return self.title + " ({days_left} days left)".format(days_left=days_left)
         else:
-            days_left = (self.exp_date - datetime.today()).days + 1
-            
-            if days_left == 1:
-                return self.title + " (Tomorrow)"
-            elif days_left == 0:
-                return self.title + " (Today)"
-            elif days_left > 1:
-                if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
-                    week_start_day = 5
-                    if 'week_start_day' in config:
-                        week_start_day_str = config['week_start_day'].lower()
-                        if week_start_day_str in ['sun', 'mon']:
-                            week_start_day = 5 if week_start_day_str == 'sun' else 6
-                    days_to_next_week = week_start_day - datetime.today().weekday() # Monday = 0, ..., Sunday = 6
-                    weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
-                    
-                    if weeks_left == 0:
-                        return self.title + " (This {weekday}; {days_left} days left)".format(
-                            weekday=self.exp_date.strftime("%A"), days_left=days_left)
-                    elif weeks_left == 1:
-                        return self.title + " (Next {weekday}; {days_left} days left)".format(
-                            weekday=self.exp_date.strftime("%A"), days_left=days_left)
-                return self.title + " ({days_left} days left)".format(days_left=days_left)
-            else:
-                return self.title + " (DUE!)"
+            return self.title + " (DUE!)"
 
 
 def add_item(title: str, exp_date: datetime):
+    """ Add a Todo item to the datafile """
     items.append(TodoItem(title, exp_date))
 
 
 def remove_item(indices: list):
+    """ Remove a Todo item from the datafile """
     for index in sorted(indices, reverse=True):
         del items[index]
 
 
 def list_items():
+    """ Iterate through each Todo item in the datafile """
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
             item_count=len(items), s="s" if len(items) >= 2 else ""))
