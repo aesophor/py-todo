@@ -41,4 +41,4 @@ $ todo -org <filename>        # Adds TODOs from Emacs org mode
 ```
 
 ## License
-Available under the [MIT License](https://github.com/aesophor/dotfiles/blob/master/LICENSE).
+Available under the [MIT License](https://github.com/aesophor/py-todo/blob/master/LICENSE)
