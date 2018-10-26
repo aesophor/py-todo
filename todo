@@ -68,7 +68,7 @@ def list_items():
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                        -- Adds a new item.")
+    print("-a --add <title>                -- Adds a new item. or adds it with a title if provided")
     print("-r --remove <index>             -- Removes an item by index.")
     print("-c --clear <index 1> <index 2>  -- Clears all items between the two indexes.")
     print("-l --list                       -- Lists all items.")
@@ -102,7 +102,11 @@ if __name__ == '__main__':
         list_items()
 
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
-        title = input("Title: ")
+        if len(sys.argv) > 2:
+            title = sys.argv[2]
+        else:
+            title = input("Title: ")
+        
         exp_date = input("Expiry date (e.g., YYYY/MM/DD, 1d) (Optional): ")
 
         if exp_date == '':
