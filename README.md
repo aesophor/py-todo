@@ -1,6 +1,6 @@
 
 <div align="center">
-<h3>PYTODO</h3>
+<h3>PY-TODO</h3>
 <img src="https://github.com/aesophor/py-todo/raw/master/assets/scrot.png">
 
 </div>
