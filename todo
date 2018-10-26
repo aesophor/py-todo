@@ -56,7 +56,8 @@ def list_items():
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                   -- Adds a new item.")
+    print("-a --add                   -- Adds a new item. With Title prompt")
+    print("-a --add <item>            -- Adds a new item. Without Title prompt")
     print("-r --remove <index>        -- Removes an item by index.")
     print("-l --list                  -- Lists all items.")
     print("-org --orgfile <filename>  -- Add org file TODOs.")
