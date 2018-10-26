@@ -1,3 +1,4 @@
+
 <div align="center">
 <h3>PYTODO</h3>
 <img src="https://github.com/aesophor/py-todo/raw/master/assets/scrot.png">
@@ -18,11 +19,15 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 * python 3.6 (pathlib, pickle)
 
 ## Installation
-Currently it only supports manual installation, sorry!
+* Arch Linux - AUR (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
+```
+yaourt -S py-todo
+```
+
 * Manual Installation (Linux)
 ```
 $ git clone https://github.com/aesophor/py-todo.git
-$ cd py-todo && cp todo ~/.local/bin/todo
+$ cd py-todo && sudo cp todo /usr/bin/todo
 ```
 * Manual Installation (OSX)
 ```
@@ -42,3 +47,4 @@ $ todo -org <filename>        # Adds TODOs from Emacs org mode
 
 ## License
 Available under the [MIT License](https://github.com/aesophor/py-todo/blob/master/LICENSE)
+
