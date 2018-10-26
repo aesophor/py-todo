@@ -48,7 +48,6 @@ def add_item(title: str, exp_date: datetime):
 def remove_item(index: int):
     del items[index]
 
-
 def list_items():
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
@@ -61,7 +60,8 @@ def list_items():
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                   -- Adds a new item.")
+    print("-a --add                   -- Adds a new item. With Title prompt")
+    print("-a --add <item>            -- Adds a new item. Without Title prompt")
     print("-r --remove <index>        -- Removes an item by index.")
     print("-l --list                  -- Lists all items.")
     print("-org --orgfile <filename>  -- Add org file TODOs.")
@@ -94,9 +94,15 @@ if __name__ == '__main__':
         list_items()
 
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
+
         title = input("Title: ")
         exp_date = input("Expiry date (e.g., YYYY/MM/DD, 1d) (Optional): ")
+        if len(sys.argv) > 2:
+            title = sys.argv[2]
+        else:
+            title = input("Title: ")
 
+        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
         if exp_date == '':
             exp_date = None
 
