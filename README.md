@@ -19,7 +19,7 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 * python 3.6 (pathlib, pickle)
 
 ## Installation
-* Arch Linux - AUR (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
+* Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
 ```
 yaourt -S py-todo
 ```
