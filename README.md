@@ -43,7 +43,7 @@ $ cd py-todo && cp todo /usr/local/bin/
 ```
 $ todo                               # List all items.
 $ todo -a                            # Add an item. (with Title / Expiry Date prompt)
-$ todo -a <todo item> <expiry date>  # Add an item. (without Title / Expiry Date prompt)
+$ todo -a <title> <expiry_date>      # Add an item. (without Title / Expiry Date prompt)
 $ todo -r <indices>                  # Remove one or more items.
 $ todo -h                            # Display help message.
 $ todo -v                            # Display version info.
