@@ -42,7 +42,6 @@ def add_item(title: str, exp_date: datetime):
 def remove_item(index: int):
     del items[index]
 
-
 def list_items():
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
