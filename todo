@@ -89,9 +89,12 @@ if __name__ == '__main__':
         list_items()
 
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
-        title = input("Title: ")
-        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
+        if len(sys.argv) > 2:
+            title = sys.argv[2]
+        else:
+            title = input("Title: ")
 
+        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
         if exp_date == '':
             exp_date = None
         else:
