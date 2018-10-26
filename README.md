@@ -59,12 +59,12 @@ week_start_day = Sun / Mon
 
 With detail_mode set to true:
 ```
-Book (Next Wednesday; 5 days left)
+Discrete Mathematics Exam (Next Wednesday; 5 days left)
 ```
 
 With detail_mode set to false:
 ```
-Book (5 days left)
+Discrete Mathematics Exam (5 days left)
 ```
 
 ## License
