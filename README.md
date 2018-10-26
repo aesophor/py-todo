@@ -42,7 +42,8 @@ $ cd py-todo && cp todo /usr/local/bin/
 ## Usage
 ```
 $ todo                        # List all items.
-$ todo -a                     # Add an item.
+$ todo -a                     # Add an item. (with Title prompt)
+$ todo -a <todo item>         # Add an item. (without Title prompt)
 $ todo -r <index>             # Remove an existing item.
 $ todo -h                     # Display help message.
 $ todo -v                     # Display version info.
@@ -51,4 +52,3 @@ $ todo -org <filename>        # Adds TODOs from Emacs org mode
 
 ## License
 Available under the [MIT License](https://github.com/aesophor/py-todo/blob/master/LICENSE)
-
