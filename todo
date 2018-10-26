@@ -20,14 +20,21 @@ class TodoItem:
         else:
             days_left = (self.exp_date - datetime.now()).days
             weekDay   = datetime.isoweekday(self.exp_date)
+            
+            thisDaysOfTheWeek = ["", "This Monday", "This Tuesday", "This Wednesday", "This Thursday", "This Friday", "This Saturday", "This Sunday"]
+            #   Doing this because a split and insert here would be ugly
+            nextDaysOfTheWeek = ["", "Next Monday", "Next Tuesday", "Next Wednesday", "Next Thursday", "Next Friday", "Next Saturday", "Next Sunday"]
+            
 
-            daysOfTheWeek = ["", "Next Monday", "Next Tuesday", "Next Wednesday", "Next Thursday", "Next Friday", "Next Saturday", "Next Sunday"]
-
-            if days_left > 6:
+            if days_left > 12:
                 return self.title + " ({days_left} days left.)".format(
                     days_left=days_left)
+
+            elif days_left > 6 and days_left <= 12:
+                return self.title +" ({dayOfTheWeek})".format(dayOfTheWeek = nextDaysOfTheWeek[weekDay])
             elif days_left > 0 and days_left <= 6:
-                return self.title +" ({dayOfTheWeek})".format(dayOfTheWeek = daysOfTheWeek[weekDay])
+                return self.title +" ({dayOfTheWeek})".format(dayOfTheWeek = thisDaysOfTheWeek[weekDay])
+            
             elif days_left == 0:
                 return self.title + " (Tomorrow)"
             elif days_left == -1:
@@ -48,6 +55,7 @@ def add_item(title: str, exp_date: datetime):
 def remove_item(index: int):
     del items[index]
 
+
 def list_items():
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
@@ -60,14 +68,14 @@ def list_items():
 def print_usage():
     print("")
     print("Usage: ." + sys.argv[0] + " <argument>")
-    print("-a --add                   -- Adds a new item. With Title prompt")
-    print("-a --add <item>            -- Adds a new item. Without Title prompt")
-    print("-r --remove <index>        -- Removes an item by index.")
-    print("-l --list                  -- Lists all items.")
-    print("-org --orgfile <filename>  -- Add org file TODOs.")
+    print("-a --add                        -- Adds a new item.")
+    print("-r --remove <index>             -- Removes an item by index.")
+    print("-c --clear <index 1> <index 2>  -- Clears all items between the two indexes.")
+    print("-l --list                       -- Lists all items.")
+    print("-org --orgfile <filename>       -- Add org file TODOs.")
     print("")
-    print("-h --help                  -- Displays help message.")
-    print("-v --version               -- Displays version info.")
+    print("-h --help                       -- Displays help message.")
+    print("-v --version                    -- Displays version info.")
 
 
 def print_version():
@@ -94,15 +102,9 @@ if __name__ == '__main__':
         list_items()
 
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
-
         title = input("Title: ")
         exp_date = input("Expiry date (e.g., YYYY/MM/DD, 1d) (Optional): ")
-        if len(sys.argv) > 2:
-            title = sys.argv[2]
-        else:
-            title = input("Title: ")
 
-        exp_date = input("Expiry date (e.g., YYYY/MM/DD) (Optional): ")
         if exp_date == '':
             exp_date = None
 
@@ -112,6 +114,7 @@ if __name__ == '__main__':
             expDate = datetime.today().toordinal() + integerD
             exp_date = date.fromordinal(expDate)
             exp_date = datetime.combine(exp_date, datetime.min.time())
+        
         else:
             try:
                 exp_date = datetime(*map(int, exp_date.split('/')))
@@ -174,6 +177,26 @@ if __name__ == '__main__':
                 list_items()
             except:
                 print("Item does not exist.")
+        else:
+            print_usage()
+
+    elif sys.argv[1] == '-c' or sys.argv[1] == '--clear':
+        if len(sys.argv) <= 2:
+            for i in range(len(items) - 1):
+                del items[i]
+
+        if len(sys.argv) > 2 and len(sys.argv) <= 4:
+            arg1 = int(sys.argv[2])
+            arg2 = int(sys.argv[3]) + 1
+            
+            try:
+                for i in range(arg1 , arg2):
+                    print("Deleted item {item}".format(item = items[i]))
+                    del items[i]
+                
+            except:
+                print("Item doesn't exist.")
+                print_usage()
         else:
             print_usage()
 
