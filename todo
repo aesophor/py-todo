@@ -90,9 +90,12 @@ def list_items():
         index = 0
         for item in items:
             if 'color' in config and config['color'] in ['true', 'True']:
-                task = item.__str__().split('(')[0]
-                date = '(' + item.__str__().split('(')[1]
-                print(color5.format(str(index) + ") ") + task + color3.format(date))
+                if '(' in item.__str__():
+                    task = item.__str__().split('(')[0]
+                    date = '(' + item.__str__().split('(')[1]
+                    print(color5.format(str(index) + ") ") + task + color3.format(date))
+                else:
+                    print(color5.format(str(index) + ") ") + item.__str__())
             else:
                 print(str(index) + ") " + item.__str__())
             index += 1
