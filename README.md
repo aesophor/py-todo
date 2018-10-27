@@ -49,7 +49,7 @@ $ todo -e <index> <titls> <expiry_date>  # Edits an item. (without Title / Expir
 $ todo -r <indices>                      # Remove one or more items.
 $ todo -h                                # Display help message.
 $ todo -v                                # Display version info.
-$ todo -org <filename>                    # Adds TODOs from Emacs org mode
+$ todo -org <filename>                   # Adds TODOs from Emacs org mode
 ```
 
 ## Configuration
