@@ -45,7 +45,7 @@ $ todo                                   # List all items.
 $ todo -a                                # Add an item. (with Title / Expiry Date prompt)
 $ todo -a <title> <expiry_date>          # Add an item. (without Title / Expiry Date prompt)
 $ todo -e <index>                        # Edits an item. (with Title / Expiry Date prompt)
-$ todo -e <index> <titls> <expiry_date>  # Edits an item. (without Title / Expiry Date prompt)
+$ todo -e <index> <title> <expiry_date>  # Edits an item. (without Title / Expiry Date prompt)
 $ todo -r <indices>                      # Remove one or more items.
 $ todo -h                                # Display help message.
 $ todo -v                                # Display version info.
@@ -53,20 +53,18 @@ $ todo -org <filename>                   # Adds TODOs from Emacs org mode
 ```
 
 ## Configuration
-This part is totally optional. Edit ~/.config/py-todo/config:
+This part is totally optional. 
+
+Edit ~/.config/py-todo/config:
 ```
 detail_mode = true / false
 week_start_day = Sun / Mon
 ```
 
-With **detail_mode** set to **true**:
+## Detail Mode
 ```
-Discrete Mathematics Exam (Next Wednesday; 5 days left)
-```
-
-With **detail_mode** set to **false**:
-```
-Discrete Mathematics Exam (5 days left)
+Discrete Mathematics Exam (Next Wednesday; 5 days left)  # detail_mode = true
+Discrete Mathematics Exam (5 days left)                  # detail_mode = false
 ```
 
 ## License
