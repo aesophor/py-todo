@@ -24,7 +24,7 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 ## Installation
 * Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
 ```
-yaourt -S py-todo
+yay -S py-todo
 ```
 
 * Manual Installation (Linux)
@@ -41,13 +41,13 @@ $ cd py-todo && cp todo /usr/local/bin/
 
 ## Usage
 ```
-$ todo                               # List all items.
-$ todo -a                            # Add an item. (with Title / Expiry Date prompt)
-$ todo -a <title> <expiry_date>      # Add an item. (without Title / Expiry Date prompt)
-$ todo -r <indices>                  # Remove one or more items.
-$ todo -h                            # Display help message.
-$ todo -v                            # Display version info.
-$ todo -org <filename>               # Adds TODOs from Emacs org mode
+$ todo								# List all items.
+$ todo -a							# Add an item. (with Title / Expiry Date prompt)
+$ todo -a <title> <expiry_date>		# Add an item. (without Title / Expiry Date prompt)
+$ todo -r <indices>					# Remove one or more items.
+$ todo -h							# Display help message.
+$ todo -v							# Display version info.
+$ todo -org <filename>				# Adds TODOs from Emacs org mode
 ```
 
 ## Configuration
@@ -55,6 +55,7 @@ This part is totally optional. Edit ~/.config/py-todo/config:
 ```
 detail_mode = true / false
 week_start_day = Sun / Mon
+color = true / false
 ```
 
 With **detail_mode** set to **true**:
