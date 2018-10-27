@@ -57,9 +57,9 @@ This part is totally optional.
 
 Edit ~/.config/py-todo/config:
 ```
+color = true / false
 detail_mode = true / false
 week_start_day = Sun / Mon
-color = true / false
 ```
 
 ## Detail Mode
