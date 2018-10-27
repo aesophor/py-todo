@@ -19,7 +19,8 @@ datafile_name = 'todo.dat'
 """ Create dictionary representing the config file """
 config = {
     'detail_mode': 'false',
-    'week_start_day': 'Sun'
+    'week_start_day': 'Sun',
+    'color': 'false'
 }
 
 items = []  # List of TodoItems, to be stored later in the datafile
@@ -80,13 +81,20 @@ def remove_item(indices: list):
 
 
 def list_items():
+    color5 = '\x1b[0;34;40m{}\x1b[0m'
+    color3 = '\x1b[0;32;40m{}\x1b[0m'
     """ Iterate through each Todo item in the datafile """
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
             item_count=len(items), s="s" if len(items) >= 2 else ""))
         index = 0
         for item in items:
-            print(str(index) + ") " + item.__str__())
+            if 'color' in config and config['color'] in ['true', 'True']:
+                task = item.__str__().split('(')[0]
+                date = '(' + item.__str__().split('(')[1]
+                print(color5.format(str(index) + ") ") + task + color3.format(date))
+            else:
+                print(str(index) + ") " + item.__str__())
             index += 1
 
 
@@ -121,6 +129,7 @@ def print_usage():
     print("Configuration Options (See " + config_location + config_name + "):")
     print("* detail_mode = true / false")
     print("* week_start_day = Sun / Mon")
+    print("* color = true / false")
 
 
 def print_version():

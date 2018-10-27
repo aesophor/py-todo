@@ -24,7 +24,7 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 ## Installation
 * Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
 ```
-yaourt -S py-todo
+yay -S py-todo
 ```
 
 * Manual Installation (Linux)
@@ -59,6 +59,7 @@ Edit ~/.config/py-todo/config:
 ```
 detail_mode = true / false
 week_start_day = Sun / Mon
+color = true / false
 ```
 
 ## Detail Mode
