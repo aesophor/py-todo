@@ -52,10 +52,9 @@ $ todo -v                                # Display version info.
 $ todo -org <filename>                   # Adds TODOs from Emacs org mode
 ```
 
-## Configuration
-This part is totally optional. 
+## Configuration (Optional)
+~/.config/py-todo/config
 
-Edit ~/.config/py-todo/config:
 ```
 color = true / false
 detail_mode = true / false
