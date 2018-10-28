@@ -243,7 +243,7 @@ if __name__ == '__main__':
                 sys.exit()
 
             try:
-                title = sys.argv[3] if len(sys.argv) > 3 else input("Title: ")
+                title = sys.argv[3] if len(sys.argv) > 3 else input("Title ({default_title}): ".format(default_title=old_item.title))
                 exp_date_str = sys.argv[4] if len(sys.argv) > 4 else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
             except KeyboardInterrupt:
                 # If the input is canceled, print a newline for prettiness, insert old item, list the items and exit
@@ -251,9 +251,12 @@ if __name__ == '__main__':
                 insert_todo_item(old_index, old_item)
                 list_items()
                 sys.exit()
-
+                
             exp_date = check_date(exp_date_str)
-
+            
+            # If the new title is empty, use the old title instead.
+            title = old_item.title if title.rstrip() == '' else title
+            
             insert_todo_item(old_index, TodoItem(title, exp_date))
             list_items()
         else:
