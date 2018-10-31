@@ -67,5 +67,16 @@ Discrete Mathematics Exam (Next Wednesday; 5 days left)  # detail_mode = true
 Discrete Mathematics Exam (5 days left)                  # detail_mode = false
 ```
 
+## Contributors
+Special thanks to all the contributors!
+* [RewoundVHS](https://github.com/RewoundVHS) - AUR Package Maintainer, Color Mode
+* [Steampunkery](https://github.com/Steampunkery) - Added -e --edit
+* [christophergeiger3](https://github.com/christophergeiger3) - Reformatted code
+* [patatman](https://github.com/patatman) - Improved -a --add. Tested py-todo on MacOS
+* [Arsukeey](https://github.com/Arsukeey) - Added Detail Mode (e.g., Next Wednesday)
+* [MMarinov97](https://github.com/MMarinov97) - Added compatibility with emacs org file
+* [diplozoon](https://github.com/diplozoon) - Reformatted code
+* [luvhalvorson](https://github.com/luvhalvorson) - Updated README.md
+
 ## License
 Available under the [MIT License](https://github.com/aesophor/py-todo/blob/master/LICENSE)
