@@ -5,6 +5,7 @@ import sys
 import pickle
 import re
 import math
+from enum import IntEnum
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
@@ -24,12 +25,24 @@ config = {
     'color': 'false'
 }
 
-items = []  # List of TodoItems, to be stored later in the datafile
+""" Define colors """
+color5 = '\x1b[0;34;40m{}\x1b[0m'
+color3 = '\x1b[0;32;40m{}\x1b[0m'
+
+""" List of TodoItems, to be stored later in the datafile """
+items = []
+
+
+class Weekday(IntEnum):
+    """ Some weekday constants """
+    MONDAY = 0
+    SATURDAY = 5
+    SUNDAY = 6
 
 
 class TodoItem:
     """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
-    def __init__(self, title, exp_date=None):
+    def __init__(self, title: str, exp_date: datetime):
         self.title = title
         self.exp_date = exp_date  # Expiration date, type: datetime
 
@@ -46,15 +59,17 @@ class TodoItem:
             return self.title + " (Tomorrow)"  # Annotate as tomorrow
         elif days_left > 1:
             output_str = self.title + " ("
+            
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
                 # Calculate weeks_left to determine the event is in this or the next week.
-                last_weekday = 5 # Saturday by default.
+                # Last weekday is Saturday by default.
+                last_weekday = Weekday.SATURDAY
                 if 'week_start_day' in config:
                     week_start_day_str = config['week_start_day'].lower()
                     if week_start_day_str in ['sun', 'mon']:
-                        last_weekday = 5 if week_start_day_str == 'sun' else 6
-                days_to_next_week = last_weekday - datetime.today().weekday() # Monday = 0, ..., Sunday = 6
+                        last_weekday = Weekday.SATURDAY if week_start_day_str == 'sun' else Weekday.SUNDAY
+                days_to_next_week = last_weekday - datetime.today().weekday()
                 weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
                 
                 # weeks_left == 0 implies this week;
@@ -81,10 +96,7 @@ def remove_item(indices: list):
 
 
 def list_items():
-    """ Iterate through each Todo item in the item list """
-    color5 = '\x1b[0;34;40m{}\x1b[0m'
-    color3 = '\x1b[0;32;40m{}\x1b[0m'
-    
+    """ Iterates through each Todo item in the item list and print them. """    
     if len(items) > 0:
         print("You have {item_count} item{s} left on the reminder!".format(
             item_count=len(items), s="s" if len(items) >= 2 else ""))
@@ -92,9 +104,8 @@ def list_items():
         for item in items:
             if 'color' in config and config['color'] in ['true', 'True']:
                 if '(' in item.__str__():
-                    task = item.__str__().split('(')[0]
                     date = '(' + item.__str__().split('(')[1]
-                    print(color5.format(str(index) + ") ") + task + color3.format(date))
+                    print(color5.format(str(index) + ") ") + item.title + " " + color3.format(date))
                 else:
                     print(color5.format(str(index) + ") ") + item.__str__())
             else:
@@ -102,7 +113,8 @@ def list_items():
             index += 1
 
 
-def check_date(exp_dat_str):
+def parse_date_str(exp_dat_str):
+    """ Tries to parse raw date string into a datetime object. """
     try:
         if exp_date_str == '':
             return None
@@ -137,7 +149,7 @@ def print_usage():
 
 
 def print_version():
-    print("py-todo 1.3.1")
+    print("py-todo 1.3.2")
     print("Copyright (C) 2018 Marco Wang")
     print("")
     print("This is free software, see the source for copying conditions.  There is NO")
@@ -178,7 +190,7 @@ if __name__ == '__main__':
             title = sys.argv[2] if len(sys.argv) > 2 else input("Title: ")
             exp_date_str = sys.argv[3] if len(sys.argv) > 3 else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
             
-            exp_date = check_date(exp_date_str)
+            exp_date = parse_date_str(exp_date_str)
             add_item(title, exp_date)
             list_items()
         except:
@@ -201,13 +213,12 @@ if __name__ == '__main__':
     elif sys.argv[1] == '-e' or sys.argv[1] == '--edit':
         if len(sys.argv) >= 3:
             try:
-                item = items[int(sys.argv[2])]
-                
+                item = items[int(sys.argv[2])] 
                 title = sys.argv[3] if len(sys.argv) > 3 else input("Title ({default_title}): ".format(default_title=item.title))
                 exp_date_str = sys.argv[4] if len(sys.argv) > 4 else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
                 
                 item.title = item.title if title.rstrip() == "" else title
-                item.exp_date = check_date(exp_date_str)
+                item.exp_date = parse_date_str(exp_date_str)
                 list_items()
             except IndexError:
                 print("Item does not exist.")
