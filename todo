@@ -52,7 +52,7 @@ class TodoItem:
         
         # Set the amount of days left as the timedelta from today to the expiration date, in days.
         days_left = (self.exp_date - datetime.today()).days + 1
-        
+
         if days_left == 0:
             return self.title + " (Today)"  # Annotate as the current day
         elif days_left == 1:
@@ -85,12 +85,21 @@ class TodoItem:
 
 
 def add_item(title: str, exp_date: datetime):
-    """ Adds a Todo item to the item list """
+    """ Add a TodoItem to the datafile """
     items.append(TodoItem(title, exp_date))
 
 
+def insert_todo_item(index, todo_item):
+    """Inserts a TodoItem at a given index
+
+    :param index: The index to insert at
+    :param todo_item: The item to insert
+    """
+    items.insert(index, todo_item)
+
+
 def remove_item(indices: list):
-    """ Removes a Todo item from the item list """
+    """ Remove a TodoItem from the datafile """
     for index in sorted(indices, reverse=True):
         del items[index]
 
@@ -114,7 +123,11 @@ def list_items():
 
 
 def parse_date_str(exp_dat_str):
-    """ Tries to parse raw date string into a datetime object. """
+    """Checks a date string and returns a datetime object
+
+    :param exp_date_str: the date string to validate
+    :return: a valid datetime object
+    """
     try:
         if exp_date_str == '':
             return None
@@ -154,6 +167,24 @@ def print_version():
     print("")
     print("This is free software, see the source for copying conditions.  There is NO")
     print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
+
+
+def take_input(title_pos, date_pos, default_title=None):
+    """
+
+    :param title_pos: the position of the title in sys.argv
+    :param date_pos: the position of the date in sys.argv
+    :param default_title: the default value for the title
+    :return:
+    """
+    if default_title:
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input(f"Title ({default_title}): ")
+    else:
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
+    
+    exp_date_str = sys.argv[date_pos] if len(sys.argv) > date_pos else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
+
+    return title if title else default_title, exp_date_str
 
 
 if __name__ == '__main__':
