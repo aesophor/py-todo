@@ -31,6 +31,9 @@ date_color = '\x1b[32m{}\x1b[0m'
 due_color = '\x1b[31;1m{}\x1b[0m'
 today_color = '\x1b[38;5;202m{}\x1b[0m'
 
+""" Regex for removing terminal escape sequences from a string """
+esc_seq_reg = re.compile(r'\x1b[^m]*m')
+
 """ List of TodoItems, to be stored later in the datafile """
 items = []
 
@@ -95,7 +98,8 @@ def maybe_color_str(message, color_fstr, predicate=lambda: True):
     :return: A colored string if the config indicated color
     """
     if config['color'] in ['true', 'True']:
-        return color_fstr.format(message) if predicate() else message
+        stripped_message = esc_seq_reg.sub('', message)
+        return color_fstr.format(stripped_message) if predicate() else message
 
     return message
 
