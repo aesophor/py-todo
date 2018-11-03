@@ -47,6 +47,7 @@ class Weekday(IntEnum):
 
 class TodoItem:
     """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
+
     def __init__(self, title: str, exp_date: datetime):
         self.title = title
         self.exp_date = exp_date  # Expiration date, type: datetime
@@ -54,7 +55,7 @@ class TodoItem:
     def __str__(self):
         if self.exp_date is None:
             return self.title
-        
+
         # Set the amount of days left as the timedelta from today to the expiration date, in days.
         days_left = (self.exp_date - datetime.today()).days + 1
 
@@ -64,7 +65,6 @@ class TodoItem:
             return self.title + " (Tomorrow)"  # Annotate as tomorrow
         elif days_left > 1:
             output_str = self.title + " ("
-            
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
                 # Calculate weeks_left to determine the event is in this or the next week.
@@ -76,7 +76,7 @@ class TodoItem:
                         last_weekday = Weekday.SATURDAY if week_start_day_str == 'sun' else Weekday.SUNDAY
                 days_to_next_week = last_weekday - datetime.today().weekday()
                 weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
-                
+
                 # weeks_left == 0 implies this week;
                 # weeks_left == 1 implies next week.
                 if weeks_left == 0 or weeks_left == 1:
@@ -169,30 +169,30 @@ def parse_date_str(exp_date_str):
 
 def print_usage():
     print()
-    print("Usage: " + sys.argv[0] + " <argument>")
-    print("-a --add                                  -- Add a new item.")
-    print("-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.")
-    print("-e --edit <index>                         -- Edit an item.")
-    print("-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.")
-    print("-r --remove <indices...>                  -- Remove items by their indices.")
-    print("-l --list                                 -- List all items.")
-    print("-org --orgfile <filename>                 -- Add org file TODOs.")
-    print()
-    print("-h --help                                 -- Display help message.")
-    print("-v --version                              -- Display version info.")
-    print('\n')
-    print("Configuration Options (See " + config_location + config_name + "):")
-    print("* color = true / false")
-    print("* detail_mode = true / false")
-    print("* week_start_day = Sun / Mon")
+    print("Usage: " + sys.argv[0] + " <argument>\n"
+          "-a --add                                  -- Add a new item.\n"
+          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
+          "-e --edit <index>                         -- Edit an item.\n"
+          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
+          "-r --remove <indices...>                  -- Remove items by their indices.\n"
+          "-l --list                                 -- List all items.\n"
+          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
+          "\n"
+          "-h --help                                 -- Display help message.\n"
+          "-v --version                              -- Display version info.\n"
+          "\n\n"
+          "Configuration Options (See " + config_location + config_name + "):\n"
+          "* color = true / false\n"
+          "* detail_mode = true / false\n"
+          "* week_start_day = Sun / Mon")
 
 
 def print_version():
-    print("py-todo 1.3.2")
-    print("Copyright (C) 2018 Marco Wang")
-    print()
-    print("This is free software, see the source for copying conditions.  There is NO")
-    print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
+    print("py-todo 1.3.2\n"
+          "Copyright (C) 2018 Marco Wang\n"
+          "\n"
+          "This is free software, see the source for copying conditions.  There is NO\n"
+          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
 
 
 def take_input(title_pos, date_pos, default_title=None):
@@ -207,10 +207,47 @@ def take_input(title_pos, date_pos, default_title=None):
         title = sys.argv[title_pos] if len(sys.argv) > title_pos else input(f"Title ({default_title}): ")
     else:
         title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
-    
+
     exp_date_str = sys.argv[date_pos] if len(sys.argv) > date_pos else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
 
     return title if title else default_title, exp_date_str
+
+
+def scrape_keywords(line):
+    """Scrapes keywords from an orgfile
+
+    :param line: The line to scrape
+    :returns: A (posibly empty) list of keywords
+    """
+    keywords = []
+    todos = line.replace('#+TODO: ', '')
+    for word in todos.split():
+        if word != '|':
+            keywords.append(word)
+    return keywords
+
+
+def strip_line(line, word):
+    """Strips a line of it's *'s and keywords
+    
+    :param line: The line to strip
+    :param word: The keyword to strip from the line
+    :returns: A stripped line
+    """
+    return line.strip('*').replace(word, '').strip()
+
+
+def scrape_date(line):
+    """Scrapes a date from a line known to contain a date
+    
+    :param line: A line containgin a date
+    :returns: A datetime object
+    """
+    date = line.split('<')[1]
+    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
+    date = match.group(0)
+    date = datetime(*map(int, date.split('-')))
+    return date
 
 
 if __name__ == '__main__':
@@ -245,7 +282,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
         try:
             title, exp_date_str = take_input(2, 3)
-            
+
             exp_date = parse_date_str(exp_date_str)
             add_item(title, exp_date)
             list_items()
@@ -293,42 +330,28 @@ if __name__ == '__main__':
         # Open the orgfile
         with open(filename, 'r') as f:
             content = f.readlines()
-            for index, line in enumerate(content):
-                # Search for the header to obtain the keywords
-                if "#+TODO:" in line:
-                    todos = line.replace('#+TODO: ', '')
-                    for word in todos.split():
-                        if word != '|':
-                            keywords.append(word)
-                else:
-                    if not keywords:
-                        keywords.append('TODO')
-                        keywords.append('DONE')
-                    for word in keywords:
-                        # Search in each line and format if match
-                        if word in line and '*' in line:
-                            line = line.strip('*')
-                            line = line.replace(word, '')
-                            line = line.strip()
-                            title = line
-                            try:
-                                if ': <' in content[index + 1]:
-                                    line, date = content[index + 1].split('<')
-                                    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
-                                    date = match.group(0)
-                                    date = datetime(*map(int, date.split('-')))
-                                    exp_date = date
-                                    add_item(title, exp_date)
-                                else:
-                                    date = None
-                                    exp_date = date
-                                    add_item(title, exp_date)
-                            except IndexError:
-                                date = None
-                                exp_date = date
-                                add_item(title, exp_date)
+
+        for index, line in enumerate(content):
+            # Search for the header to obtain the keywords
+            if "#+TODO:" in line:
+                keywords.extend(scrape_keywords())
+            else:
+                if not keywords:
+                    keywords.append('TODO')
+                    keywords.append('DONE')
+                for word in keywords:
+                    # Search in each line and format if match
+                    if word in line and '*' in line:
+                        title = strip_line(line, word)
+                        try:
+                            if ': <' in content[index + 1]:
+                                add_item(title, scrape_date(content[index + 1]))
+                            else:
+                                add_item(title, None)
+                        except IndexError:
+                            add_item(title, None)
         list_items()
- 
+
     elif sys.argv[1] == '-v' or sys.argv[1] == '--version':
         print_version()
 
