@@ -174,6 +174,7 @@ def print_usage():
     print("-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.")
     print("-e --edit <index>                         -- Edit an item.")
     print("-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.")
+    print("-m --move <index> <new index>             -- Move an item from index to new index.")
     print("-r --remove <indices...>                  -- Remove items by their indices.")
     print("-l --list                                 -- List all items.")
     print("-org --orgfile <filename>                 -- Add org file TODOs.")
@@ -284,6 +285,21 @@ if __name__ == '__main__':
                 print()
                 list_items()
                 sys.exit()
+        else:
+            print_usage()
+
+    elif sys.argv[1] == "-m" or sys.argv[1] == "--move":
+        if len(sys.argv) == 4:
+            try:
+                to_move = items[int(sys.argv[2])]
+                remove_item([int(sys.argv[2])])
+                insert_todo_item(int(sys.argv[3]), to_move)
+            except (IndexError, ValueError):
+                print("Item does not exist.")
+                sys.exit()
+
+            list_items()
+
         else:
             print_usage()
 
