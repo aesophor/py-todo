@@ -21,7 +21,6 @@ datafile_name = 'todo.dat'
 """ Create dictionary representing the config file """
 config = {
     'detail_mode': 'false',
-    'week_start_day': 'Sun',
     'color': 'false'
 }
 
@@ -36,13 +35,6 @@ esc_seq_reg = re.compile(r'\x1b[^m]*m')
 
 """ List of TodoItems, to be stored later in the datafile """
 items = []
-
-
-class Weekday(IntEnum):
-    """ Some weekday constants """
-    MONDAY = 0
-    SATURDAY = 5
-    SUNDAY = 6
 
 
 class TodoItem:
@@ -68,25 +60,21 @@ class TodoItem:
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
                 # Calculate weeks_left to determine the event is in this or the next week.
-                # Last weekday is Saturday by default.
-                last_weekday = Weekday.SATURDAY
-                if 'week_start_day' in config:
-                    week_start_day_str = config['week_start_day'].lower()
-                    if week_start_day_str in ['sun', 'mon']:
-                        last_weekday = Weekday.SATURDAY if week_start_day_str == 'sun' else Weekday.SUNDAY
-                days_to_next_week = last_weekday - datetime.today().weekday()
-                weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
+                weeks_left = int((self.exp_date - datetime.today()).days / 6)  # Divide by six because zero indexing
                 
                 # weeks_left == 0 implies this week;
                 # weeks_left == 1 implies next week.
                 if weeks_left == 0 or weeks_left == 1:
-                    output_str += "{this_or_next} {weekday}; ".format(
-                        this_or_next="This" if weeks_left == 0 else "Next",
-                        weekday=self.exp_date.strftime("%A")
-                    )
+                    output_str += f"{'This' if weeks_left == 0 else 'Next'} {self.exp_date.strftime('%A')}; "
             return output_str + f"{days_left} days left)"
         else:
             return self.title + " (DUE!)"
+
+    def __eq__(self, other):
+        """ Override default equality """
+        if isinstance(other, TodoItem):
+            return (self.title == other.title) and (self.exp_date == other.exp_date)
+        return False
 
 
 def maybe_color_str(message, color_fstr, predicate=lambda: True):
@@ -185,7 +173,6 @@ def print_usage():
     print("Configuration Options (See " + config_location + config_name + "):")
     print("* color = true / false")
     print("* detail_mode = true / false")
-    print("* week_start_day = Sun / Mon")
 
 
 def print_version():
