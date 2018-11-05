@@ -172,7 +172,6 @@ def print_usage():
     print("Configuration Options (See " + config_location + config_name + "):")
     print("* color = true / false")
     print("* detail_mode = true / false")
-    print("* week_start_day = Sun / Mon")
 
 
 def print_version():
