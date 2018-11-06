@@ -21,27 +21,25 @@ datafile_name = 'todo.dat'
 """ Create dictionary representing the config file """
 config = {
     'detail_mode': 'false',
-    'week_start_day': 'Sun',
     'color': 'false'
 }
 
 """ Define colors """
-color5 = '\x1b[0;34;40m{}\x1b[0m'
-color3 = '\x1b[0;32;40m{}\x1b[0m'
+index_color = '\x1b[34m{}\x1b[0m'
+date_color = '\x1b[32m{}\x1b[0m'
+due_color = '\x1b[31m{}\x1b[0m'
+today_color = '\x1b[33m{}\x1b[0m'
+
+""" Regex for removing terminal escape sequences from a string """
+esc_seq_reg = re.compile(r'\x1b[^m]*m')
 
 """ List of TodoItems, to be stored later in the datafile """
 items = []
 
 
-class Weekday(IntEnum):
-    """ Some weekday constants """
-    MONDAY = 0
-    SATURDAY = 5
-    SUNDAY = 6
-
-
 class TodoItem:
     """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
+
     def __init__(self, title: str, exp_date: datetime):
         self.title = title
         self.exp_date = exp_date  # Expiration date, type: datetime
@@ -49,72 +47,102 @@ class TodoItem:
     def __str__(self):
         if self.exp_date is None:
             return self.title
-        
+
         # Set the amount of days left as the timedelta from today to the expiration date, in days.
         days_left = (self.exp_date - datetime.today()).days + 1
-        
+
         if days_left == 0:
             return self.title + " (Today)"  # Annotate as the current day
         elif days_left == 1:
             return self.title + " (Tomorrow)"  # Annotate as tomorrow
         elif days_left > 1:
             output_str = self.title + " ("
-            
+
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
                 # Calculate weeks_left to determine the event is in this or the next week.
-                # Last weekday is Saturday by default.
-                last_weekday = Weekday.SATURDAY
-                if 'week_start_day' in config:
-                    week_start_day_str = config['week_start_day'].lower()
-                    if week_start_day_str in ['sun', 'mon']:
-                        last_weekday = Weekday.SATURDAY if week_start_day_str == 'sun' else Weekday.SUNDAY
-                days_to_next_week = last_weekday - datetime.today().weekday()
-                weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
+                weeks_left = int((self.exp_date - datetime.today()).days / 6)  # Divide by six because zero indexing
                 
                 # weeks_left == 0 implies this week;
                 # weeks_left == 1 implies next week.
                 if weeks_left == 0 or weeks_left == 1:
-                    output_str += "{this_or_next} {weekday}; ".format(
-                        this_or_next="This" if weeks_left == 0 else "Next",
-                        weekday=self.exp_date.strftime("%A")
-                    )
-            return output_str + "{days_left} days left)".format(days_left=days_left)
+                    output_str += f"{'This' if weeks_left == 0 else 'Next'} {self.exp_date.strftime('%A')}; "
+            return output_str + f"{days_left} days left)"
         else:
             return self.title + " (DUE!)"
 
+    def __eq__(self, other):
+        """ Override default equality """
+        if isinstance(other, TodoItem):
+            return (self.title == other.title) and (self.exp_date == other.exp_date)
+        return False
+
+
+def maybe_color_str(message, color_fstr, predicate=lambda: True):
+    """Colors a string with color_fstr if the config has the color flag set to true
+
+    :param message: The message to possibly colorize
+    :param color_fstr: The color fomat string
+    :param predicate: A function deciding whether the message should be colored, alongside the config file
+    :return: A colored string if the config indicated color
+    """
+    if config['color'] in ['true', 'True']:
+        stripped_message = esc_seq_reg.sub('', message)
+        return color_fstr.format(stripped_message) if predicate() else message
+
+    return message
+
 
 def add_item(title: str, exp_date: datetime):
-    """ Adds a Todo item to the item list """
+    """ Adds a TodoItem to the items list """
     items.append(TodoItem(title, exp_date))
 
 
+def insert_todo_item(index, todo_item):
+    """Inserts a TodoItem into the items list at a given index
+
+    :param index: The index to insert at
+    :param todo_item: The item to insert
+    """
+    items.insert(index, todo_item)
+
+
 def remove_item(indices: list):
-    """ Removes a Todo item from the item list """
+    """ Removes a TodoItem from the items list """
     for index in sorted(indices, reverse=True):
         del items[index]
 
 
 def list_items():
-    """ Iterates through each Todo item in the item list and print them. """    
+    """ Iterate through each TodoItem in the items list and print it """
     if len(items) > 0:
-        print("You have {item_count} item{s} left on the reminder!".format(
-            item_count=len(items), s="s" if len(items) >= 2 else ""))
-        index = 0
-        for item in items:
-            if 'color' in config and config['color'] in ['true', 'True']:
-                if '(' in item.__str__():
-                    date = '(' + item.__str__().split('(')[1]
-                    print(color5.format(str(index) + ") ") + item.title + " " + color3.format(date))
-                else:
-                    print(color5.format(str(index) + ") ") + item.__str__())
+        print(f"You have {len(items)} item{'s' if len(items) >= 2 else ''} left on the reminder!")
+
+        for index, item in enumerate(items):
+            item_str = str(item)
+            index = str(index)
+
+            maybe_colored_index = maybe_color_str(index + ") ", index_color)
+
+            if '(' in item_str:
+                date = item_str[item_str.index('('):]  # Slice of str from the first occurrence of "(" (inclusive)
+
+                # The date could possibly be either color, so no harm in calling maybe_color_str multiple times
+                date = maybe_color_str(date, due_color, lambda: True if "DUE" in date else False)
+                date = maybe_color_str(date, date_color, lambda: True if "DUE" not in date else False)
+                date = maybe_color_str(date, today_color, lambda: True if "Today" in date else False)
+
+                print(maybe_colored_index + item.title + " " + date)
             else:
-                print(str(index) + ") " + item.__str__())
-            index += 1
+                print(maybe_colored_index + item_str)
 
 
-def parse_date_str(exp_dat_str):
-    """ Tries to parse raw date string into a datetime object. """
+def parse_date_str(exp_date_str):
+    """Parses a date string and returns a datetime object
+
+    :param exp_date_str: the date string to validate
+    :return: a valid datetime object
+    """
     try:
         if exp_date_str == '':
             return None
@@ -130,30 +158,85 @@ def parse_date_str(exp_dat_str):
 
 def print_usage():
     print()
-    print("Usage: " + sys.argv[0] + " <argument>")
-    print("-a --add                                  -- Add a new item.")
-    print("-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.")
-    print("-e --edit <index>                         -- Edit an item.")
-    print("-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.")
-    print("-r --remove <indices...>                  -- Remove items by their indices.")
-    print("-l --list                                 -- List all items.")
-    print("-org --orgfile <filename>                 -- Add org file TODOs.")
-    print()
-    print("-h --help                                 -- Display help message.")
-    print("-v --version                              -- Display version info.")
-    print('\n')
-    print("Configuration Options (See " + config_location + config_name + "):")
-    print("* color = true / false")
-    print("* detail_mode = true / false")
-    print("* week_start_day = Sun / Mon")
+    print("Usage: " + sys.argv[0] + " <argument>\n"
+          "-a --add                                  -- Add a new item.\n"
+          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
+          "-e --edit <index>                         -- Edit an item.\n"
+          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
+          "-m --move <index> <new index>             -- Move an item from index to new index."
+          "-r --remove <indices...>                  -- Remove items by their indices.\n"
+          "-l --list                                 -- List all items.\n"
+          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
+          "\n"
+          "-h --help                                 -- Display help message.\n"
+          "-v --version                              -- Display version info.\n"
+          "\n\n"
+          "Configuration Options (See " + config_location + config_name + "):\n"
+          "* color = true / false\n"
+          "* detail_mode = true / false\n")
 
 
 def print_version():
-    print("py-todo 1.3.2")
-    print("Copyright (C) 2018 Marco Wang")
-    print("")
-    print("This is free software, see the source for copying conditions.  There is NO")
-    print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
+    print("py-todo 1.3.2\n"
+          "Copyright (C) 2018 Marco Wang\n"
+          "\n"
+          "This is free software, see the source for copying conditions.  There is NO\n"
+          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
+
+
+def take_input(title_pos, date_pos, default_title=None):
+    """Takes a title and date from the user if not present in sys.argv
+
+    :param title_pos: the position of the title in sys.argv
+    :param date_pos: the position of the date in sys.argv
+    :param default_title: the default value for the title
+    :return: a tuple containing the title and date
+    """
+    if default_title:
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input(f"Title ({default_title}): ")
+    else:
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
+
+    exp_date_str = sys.argv[date_pos] if len(sys.argv) > date_pos else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
+
+    return title if title else default_title, exp_date_str
+
+
+def scrape_keywords(line):
+    """Scrapes keywords from an orgfile
+
+    :param line: The line to scrape
+    :returns: A (posibly empty) list of keywords
+    """
+    keywords = []
+    todos = line.replace('#+TODO: ', '')
+    for word in todos.split():
+        if word != '|':
+            keywords.append(word)
+    return keywords
+
+
+def strip_line(line, word):
+    """Strips a line of it's *'s and keywords
+    
+    :param line: The line to strip
+    :param word: The keyword to strip from the line
+    :returns: A stripped line
+    """
+    return line.strip('*').replace(word, '').strip()
+
+
+def scrape_date(line):
+    """Scrapes a date from a line known to contain a date
+    
+    :param line: A line containgin a date
+    :returns: A datetime object
+    """
+    date = line.split('<')[1]
+    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
+    date = match.group(0)
+    date = datetime(*map(int, date.split('-')))
+    return date
 
 
 if __name__ == '__main__':
@@ -187,14 +270,13 @@ if __name__ == '__main__':
 
     elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
         try:
-            title = sys.argv[2] if len(sys.argv) > 2 else input("Title: ")
-            exp_date_str = sys.argv[3] if len(sys.argv) > 3 else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
-            
+            title, exp_date_str = take_input(2, 3)
+
             exp_date = parse_date_str(exp_date_str)
             add_item(title, exp_date)
             list_items()
-        except:
-            # If the input is canceled, print a newline for prettiness, insert old item, list the items and exit
+        except KeyboardInterrupt:
+            # If the input is canceled, print a newline for prettiness, list the items and exit
             print()
             list_items()
             sys.exit()
@@ -213,22 +295,36 @@ if __name__ == '__main__':
     elif sys.argv[1] == '-e' or sys.argv[1] == '--edit':
         if len(sys.argv) >= 3:
             try:
-                item = items[int(sys.argv[2])] 
-                title = sys.argv[3] if len(sys.argv) > 3 else input("Title ({default_title}): ".format(default_title=item.title))
-                exp_date_str = sys.argv[4] if len(sys.argv) > 4 else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
-                
-                item.title = item.title if title.rstrip() == "" else title
+                item = items[int(sys.argv[2])]
+                title, exp_date_str = take_input(3, 4, default_title=item.title)
+
+                item.title = title
                 item.exp_date = parse_date_str(exp_date_str)
                 list_items()
             except IndexError:
                 print("Item does not exist.")
                 sys.exit()
             except KeyboardInterrupt:
-                # If the input is canceled, print a newline for prettiness, insert old item, list the items and exit
+                # If the input is canceled, print a newline for prettiness, list the items and exit
+                # We don't need to re-add the old item here because if input is canceled, we never actually changed it
                 print()
-                insert_todo_item(old_index, old_item)
                 list_items()
                 sys.exit()
+        else:
+            print_usage()
+
+    elif sys.argv[1] == "-m" or sys.argv[1] == "--move":
+        if len(sys.argv) == 4:
+            try:
+                to_move = items[int(sys.argv[2])]
+                remove_item([int(sys.argv[2])])
+                insert_todo_item(int(sys.argv[3]), to_move)
+            except (IndexError, ValueError):
+                print("Item does not exist.")
+                sys.exit()
+
+            list_items()
+
         else:
             print_usage()
 
@@ -238,42 +334,28 @@ if __name__ == '__main__':
         # Open the orgfile
         with open(filename, 'r') as f:
             content = f.readlines()
-            for index, line in enumerate(content):
-                # Search for the header to obtain the keywords
-                if "#+TODO:" in line:
-                    todos = line.replace('#+TODO: ', '')
-                    for word in todos.split():
-                        if word != '|':
-                            keywords.append(word)
-                else:
-                    if not keywords:
-                        keywords.append('TODO')
-                        keywords.append('DONE')
-                    for word in keywords:
-                        # Search in each line and format if match
-                        if word in line and '*' in line:
-                            line = line.strip('*')
-                            line = line.replace(word, '')
-                            line = line.strip()
-                            title = line
-                            try:
-                                if ': <' in content[index + 1]:
-                                    line, date = content[index + 1].split('<')
-                                    match = re.search(r'\d{4}-\d{2}-\d{2}', date)
-                                    date = match.group(0)
-                                    date = datetime(*map(int, date.split('-')))
-                                    exp_date = date
-                                    add_item(title, exp_date)
-                                else:
-                                    date = None
-                                    exp_date = date
-                                    add_item(title, exp_date)
-                            except IndexError:
-                                date = None
-                                exp_date = date
-                                add_item(title, exp_date)
+
+        for index, line in enumerate(content):
+            # Search for the header to obtain the keywords
+            if "#+TODO:" in line:
+                keywords.extend(scrape_keywords())
+            else:
+                if not keywords:
+                    keywords.append('TODO')
+                    keywords.append('DONE')
+                for word in keywords:
+                    # Search in each line and format if match
+                    if word in line and '*' in line:
+                        title = strip_line(line, word)
+                        try:
+                            if ': <' in content[index + 1]:
+                                add_item(title, scrape_date(content[index + 1]))
+                            else:
+                                add_item(title, None)
+                        except IndexError:
+                            add_item(title, None)
         list_items()
- 
+
     elif sys.argv[1] == '-v' or sys.argv[1] == '--version':
         print_version()
 
