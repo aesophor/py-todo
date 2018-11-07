@@ -194,7 +194,7 @@ def take_input(title_pos, date_pos, default_title=None):
     :return: a tuple containing the title and date
     """
     if default_title:
-        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title ({default_title}): ".format(default_title=item.title))
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title ({default_title}): ".format(default_title=default_title))
     else:
         title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
 
