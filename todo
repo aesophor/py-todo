@@ -64,8 +64,10 @@ class TodoItem:
                 # weeks_left == 0 implies this week;
                 # weeks_left == 1 implies next week.
                 if weeks_left == 0 or weeks_left == 1:
-                    output_str += f"{'This' if weeks_left == 0 else 'Next'} {self.exp_date.strftime('%A')}; "
-            return output_str + f"{days_left} days left)"
+                    output_str += "{this_or_next} {weekday}; ".format(
+                        this_or_next="This" if weeks_left == 0 else "Next",
+                        weekday=self.exp_date.strftime("%A"))
+            return output_str + "{days_left} days left)".format(days_left=days_left)
         else:
             return self.title + " (DUE!)"
 
@@ -114,7 +116,8 @@ def remove_item(indices: list):
 def list_items():
     """ Iterate through each TodoItem in the items list and print it """
     if len(items) > 0:
-        print(f"You have {len(items)} item{'s' if len(items) >= 2 else ''} left on the reminder!")
+        print("You have {item_count} item{s} left on the reminder!".format(
+            item_count=len(items), s="s" if len(items) >= 2 else ""))
 
         for index, item in enumerate(items):
             item_str = str(item)
@@ -191,7 +194,7 @@ def take_input(title_pos, date_pos, default_title=None):
     :return: a tuple containing the title and date
     """
     if default_title:
-        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input(f"Title ({default_title}): ")
+        title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title ({default_title}): ".format(default_title=item.title))
     else:
         title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
 
