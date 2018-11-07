@@ -136,7 +136,8 @@ def list_items():
                 print(maybe_colored_index + item.title + " " + date)
             else:
                 print(maybe_colored_index + item_str)
-
+    else:
+        print("Your list is empty.")
 
 def parse_date_str(exp_date_str):
     """Parses a date string and returns a datetime object
