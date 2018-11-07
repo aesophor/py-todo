@@ -15,7 +15,7 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 
 
 ## Dependencies
-* python >=3.6 (pathlib, pickle)
+* python >=3.5 (sys, re, pickle, pathlib, datetime)
 
 ## Supported Platforms
 * Linux
@@ -68,15 +68,15 @@ Discrete Mathematics Exam (5 days left)                  # detail_mode = false
 ```
 
 ## Contributors
-Special thanks to all the contributors!
-* [RewoundVHS](https://github.com/RewoundVHS) - AUR Package Maintainer, Color Mode
-* [Steampunkery](https://github.com/Steampunkery) - Added -e --edit, -m --move, refactoring
-* [christophergeiger3](https://github.com/christophergeiger3) - Reformatted code
-* [patatman](https://github.com/patatman) - Improved -a --add. Tested py-todo on MacOS
+Special thanks to all the contributors! (In lexicographical order)
 * [Arsukeey](https://github.com/Arsukeey) - Added Detail Mode (e.g., Next Wednesday)
-* [MMarinov97](https://github.com/MMarinov97) - Added compatibility with emacs org file
+* [christophergeiger3](https://github.com/christophergeiger3) - Reformatted code
 * [diplozoon](https://github.com/diplozoon) - Reformatted code
 * [luvhalvorson](https://github.com/luvhalvorson) - Updated README.md
+* [MMarinov97](https://github.com/MMarinov97) - Added compatibility with emacs org file
+* [patatman](https://github.com/patatman) - Improved -a --add. Tested py-todo on MacOS
+* [RewoundVHS](https://github.com/RewoundVHS) - AUR Package Maintainer, Color Mode
+* [Steampunkery](https://github.com/Steampunkery) - Added -e --edit, -m --move, refactoring
 
 ## License
 Available under the [MIT License](https://github.com/aesophor/py-todo/blob/master/LICENSE)
