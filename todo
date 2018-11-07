@@ -339,7 +339,7 @@ if __name__ == '__main__':
         for index, line in enumerate(content):
             # Search for the header to obtain the keywords
             if "#+TODO:" in line:
-                keywords.extend(scrape_keywords())
+                keywords.extend(scrape_keywords(line))
             else:
                 if not keywords:
                     keywords.append('TODO')
