@@ -255,7 +255,7 @@ def print_usage():
 
 
 def print_version():
-    print("py-todo 1.3.2\n"
+    print("py-todo 1.3.3\n"
           "Copyright (C) 2018 Marco Wang\n"
           "\n"
           "This is free software, see the source for copying conditions.  There is NO\n"
