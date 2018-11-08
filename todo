@@ -67,11 +67,10 @@ class TodoItem:
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
                 # Calculate weeks_left to determine the event is in this or the next week.
-                # Last weekday is Saturday by default.
-                last_weekday = Weekday.SATURDAY
-
                 if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
                     last_weekday = Weekday.SUNDAY
+                else:
+                    last_weekday = Weekday.SATURDAY
 
                 # Suppose today is Thursday, and the week_start_day is Sunday.
                 # days_to_next_week = 5 (Sat) - 3 (Thu) = 2 (days)
@@ -81,12 +80,11 @@ class TodoItem:
                 #     (6 - 2) / 7 = 0 ... 4
                 # elif E has 2 days left:
                 #     (2 - 2) / 7 = 0 ... 0
-                #       
+                #
                 # Therefore, we have to apply ceiling function to weeks_left
-                # in order to distinguish between current week and next week.
-                # I gazed at a calendar and came up with this algorithm.
+                # in order to distinguish between current week and next week. 
                 days_to_next_week = last_weekday - datetime.today().weekday()
-                weeks_left = ceil( (days_left - days_to_next_week) / 7 )
+                weeks_left = ceil((days_left - days_to_next_week) / 7) # There are 7 days in a week.
 
                 # weeks_left == 0 iff this week;
                 # weeks_left == 1 iff next week.
