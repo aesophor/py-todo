@@ -27,7 +27,7 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 sudo dpkg -i py-todo_1.3.3-3_all.deb
 ```
 
-* Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Submitted by [RewoundVHS](https://github.com/RewoundVHS))
+* Arch Linux - [AUR](https://aur.archlinux.org/packages/py-todo) (Maintained by [RewoundVHS](https://github.com/RewoundVHS))
 ```
 yay -S py-todo
 ```
