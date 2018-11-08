@@ -137,7 +137,7 @@ def list_items():
             else:
                 print(maybe_colored_index + item_str)
     else:
-        print("Your list is empty.")
+        print("No items left on the reminder.")
 
 def parse_date_str(exp_date_str):
     """Parses a date string and returns a datetime object
