@@ -22,9 +22,8 @@ Pickled (i.e., serialized) todo list objects are saved in ~/.local/share/py-todo
 * OSX (tested on 10.14 Mojave)
 
 ## Installation
-* Debian / Ubuntu / Mint
+* Debian / Ubuntu / Mint - [Get latest deb](https://github.com/aesophor/py-todo/releases)
 ```
-# Download .deb from the release page (https://github.com/aesophor/py-todo/releases)
 sudo dpkg -i py-todo_1.3.3-3_all.deb
 ```
 
