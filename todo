@@ -66,12 +66,14 @@ class TodoItem:
 
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
             if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
-                # Calculate weeks_left to determine the event is in this or the next week.
+                # By default, the first weekday is 'Sun' (last_weekday = Weekday.SATURDAY),
+                # Users are allowed to override it with 'Mon' (last_weekday = Weekday.SUNDAY).
                 if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
                     last_weekday = Weekday.SUNDAY
                 else:
                     last_weekday = Weekday.SATURDAY
 
+                # Calculate weeks_left to determine the event is in this or the next week.
                 # Suppose today is Thursday, and the week_start_day is Sunday.
                 # days_to_next_week = 5 (Sat) - 3 (Thu) = 2 (days)
                 #
