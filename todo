@@ -4,7 +4,7 @@
 import sys
 import pickle
 import re
-import math
+from math import ceil
 from enum import IntEnum
 from pathlib import Path
 from datetime import datetime
@@ -18,12 +18,6 @@ datafile_location = str(Path.home()) + '/.local/share/py-todo/'
 config_name = 'config'
 datafile_name = 'todo.dat'
 
-""" Create dictionary representing the config file """
-config = {
-    'detail_mode': 'false',
-    'color': 'false'
-}
-
 """ Define colors """
 index_color = '\x1b[34m{}\x1b[0m'
 date_color = '\x1b[32m{}\x1b[0m'
@@ -33,15 +27,20 @@ today_color = '\x1b[33m{}\x1b[0m'
 """ Regex for removing terminal escape sequences from a string """
 esc_seq_reg = re.compile(r'\x1b[^m]*m')
 
-""" List of TodoItems, to be stored later in the datafile """
-items = []
-
-
 class Weekday(IntEnum):
-    """ Some weekday constants """
+    """ Define Weekday constants """
     MONDAY = 0
     SATURDAY = 5
     SUNDAY = 6
+
+""" List of TodoItems, to be stored later in the datafile """
+items = []
+
+""" Create a dictionary storing program's configuration during runtime """
+config = {
+    'color': 'false',
+    'detail_mode': 'false',
+}
 
 
 class TodoItem:
@@ -49,7 +48,7 @@ class TodoItem:
 
     def __init__(self, title: str, exp_date: datetime):
         self.title = title
-        self.exp_date = exp_date  # Expiration date, type: datetime
+        self.exp_date = exp_date
 
     def __str__(self):
         if self.exp_date is None:
@@ -70,26 +69,24 @@ class TodoItem:
                 # Calculate weeks_left to determine the event is in this or the next week.
                 # Last weekday is Saturday by default.
                 last_weekday = Weekday.SATURDAY
-                if 'week_start_day' in config:
-                    week_start_day_str = config['week_start_day'].lower()
-                    if week_start_day_str in ['sun', 'mon']:
-                        last_weekday = Weekday.SATURDAY if week_start_day_str == 'sun' else Weekday.SUNDAY
+                
+                if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'sun':
+                    last_weekday = Weekday.SATURDAY
 
-                days_to_next_week = last_weekday - datetime.today().weekday()
-
-                # e.g., Suppose today is Thursday, and the week_start_day is Sunday.
-                #       days_to_next_week = 5 (Sat) - 3 (Thu) = 2 (days)
+                # Suppose today is Thursday, and the week_start_day is Sunday.
+                # days_to_next_week = 5 (Sat) - 3 (Thu) = 2 (days)
                 #
-                #       Consider an arbitrary event E,        
-                #       if E has 6 days left:
-                #           (6 - 2) / 7 = 0 ... 4
-                #       elif E has 2 days left:
-                #           (2 - 2) / 7 = 0 ... 0
+                # Consider an arbitrary event E,
+                # if E has 6 days left:
+                #     (6 - 2) / 7 = 0 ... 4
+                # elif E has 2 days left:
+                #     (2 - 2) / 7 = 0 ... 0
                 #       
-                #       Therefore, we have to apply ceiling function to weeks_left
-                #       in order to distinguish between current week and next week.
-                #       I gazed at a calendar and came up with this algorithm.
-                weeks_left = math.ceil( (days_left - days_to_next_week) / 7 )
+                # Therefore, we have to apply ceiling function to weeks_left
+                # in order to distinguish between current week and next week.
+                # I gazed at a calendar and came up with this algorithm.
+                days_to_next_week = last_weekday - datetime.today().weekday()
+                weeks_left = ceil( (days_left - days_to_next_week) / 7 )
 
                 # weeks_left == 0 iff this week;
                 # weeks_left == 1 iff next week.
@@ -167,6 +164,7 @@ def list_items():
     else:
         print("No items left on the reminder.")
 
+
 def parse_date_str(exp_date_str):
     """Parses a date string and returns a datetime object
     :param exp_date_str: the date string to validate
@@ -183,34 +181,6 @@ def parse_date_str(exp_date_str):
     except:
         print("An error occurred while parsing your date.")
         sys.exit()
-
-
-def print_usage():
-    print()
-    print("Usage: " + sys.argv[0] + " <argument>\n"
-          "-a --add                                  -- Add a new item.\n"
-          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
-          "-e --edit <index>                         -- Edit an item.\n"
-          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
-          "-m --move <index> <new index>             -- Move an item from index to new index.\n"
-          "-r --remove <indices...>                  -- Remove items by their indices.\n"
-          "-l --list                                 -- List all items.\n"
-          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
-          "\n"
-          "-h --help                                 -- Display help message.\n"
-          "-v --version                              -- Display version info.\n"
-          "\n\n"
-          "Configuration Options (See " + config_location + config_name + "):\n"
-          "* color = true / false\n"
-          "* detail_mode = true / false\n")
-
-
-def print_version():
-    print("py-todo 1.3.2\n"
-          "Copyright (C) 2018 Marco Wang\n"
-          "\n"
-          "This is free software, see the source for copying conditions.  There is NO\n"
-          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
 
 
 def take_input(title_pos, date_pos, default_title=None):
@@ -244,8 +214,7 @@ def scrape_keywords(line):
 
 
 def strip_line(line, word):
-    """Strips a line of it's *'s and keywords
-    
+    """Strips a line of it's *'s and keywords 
     :param line: The line to strip
     :param word: The keyword to strip from the line
     :returns: A stripped line
@@ -255,7 +224,6 @@ def strip_line(line, word):
 
 def scrape_date(line):
     """Scrapes a date from a line known to contain a date
-    
     :param line: A line containgin a date
     :returns: A datetime object
     """
@@ -264,6 +232,35 @@ def scrape_date(line):
     date = match.group(0)
     date = datetime(*map(int, date.split('-')))
     return date
+
+
+def print_usage():
+    print()
+    print("Usage: " + sys.argv[0] + " <argument>\n"
+          "-a --add                                  -- Add a new item.\n"
+          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
+          "-e --edit <index>                         -- Edit an item.\n"
+          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
+          "-m --move <index> <new index>             -- Move an item from index to new index.\n"
+          "-r --remove <indices...>                  -- Remove items by their indices.\n"
+          "-l --list                                 -- List all items.\n"
+          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
+          "\n"
+          "-h --help                                 -- Display help message.\n"
+          "-v --version                              -- Display version info.\n"
+          "\n\n"
+          "Configuration Options (See " + config_location + config_name + "):\n"
+          "* color = true / false\n"
+          "* detail_mode = true / false\n")
+
+
+def print_version():
+    print("py-todo 1.3.2\n"
+          "Copyright (C) 2018 Marco Wang\n"
+          "\n"
+          "This is free software, see the source for copying conditions.  There is NO\n"
+          "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE")
+
 
 
 if __name__ == '__main__':
