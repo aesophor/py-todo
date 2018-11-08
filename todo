@@ -69,9 +69,9 @@ class TodoItem:
                 # Calculate weeks_left to determine the event is in this or the next week.
                 # Last weekday is Saturday by default.
                 last_weekday = Weekday.SATURDAY
-                
-                if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'sun':
-                    last_weekday = Weekday.SATURDAY
+
+                if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
+                    last_weekday = Weekday.SUNDAY
 
                 # Suppose today is Thursday, and the week_start_day is Sunday.
                 # days_to_next_week = 5 (Sat) - 3 (Thu) = 2 (days)
