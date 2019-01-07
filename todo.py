@@ -203,7 +203,7 @@ def take_input(title_pos, date_pos, default_title=None):
 def scrape_keywords(line):
     """Scrapes keywords from an orgfile
     :param line: The line to scrape
-    :returns: A (posibly empty) list of keywords
+    :returns: A (possibly empty) list of keywords
     """
     keywords = []
     todos = line.replace('#+TODO: ', '')
@@ -271,10 +271,14 @@ if __name__ == '__main__':
     # Try to load user configuration.
     try:
         with open(config_location + config_name, 'r') as f:
-            for line in f:
-                if not line.startswith('#'):
-                    key, val = line.replace(' ', '').split('=')
-                    config[key] = val.rstrip('\n')
+            try:
+                for line in f:
+                    if not line.startswith('#') and line is not '':
+                        key, val = line.replace(' ', '').split('=')
+                        config[key] = val.rstrip('\n')
+            except:
+                print("Configuration file parsing error")
+
     except FileNotFoundError:
         pass
 
