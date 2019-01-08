@@ -22,7 +22,7 @@ config_name = 'config'
 datafile_name = 'todo.dat'
 
 """ Define colors """
-index_color = '\x1b[95m{}\x1b[0m'
+index_color = '\x1b[35m{}\x1b[0m'
 date_color = '\x1b[32m{}\x1b[0m'
 due_color = '\x1b[31m{}\x1b[0m'
 today_color = '\x1b[33m{}\x1b[0m'
