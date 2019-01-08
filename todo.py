@@ -19,7 +19,7 @@ config_name = 'config'
 datafile_name = 'todo.dat'
 
 """ Define colors """
-index_color = '\x1b[34m{}\x1b[0m'
+index_color = '\x1b[95m{}\x1b[0m'
 date_color = '\x1b[32m{}\x1b[0m'
 due_color = '\x1b[31m{}\x1b[0m'
 today_color = '\x1b[33m{}\x1b[0m'
@@ -271,13 +271,14 @@ if __name__ == '__main__':
     # Try to load user configuration.
     try:
         with open(config_location + config_name, 'r') as f:
-            try:
                 for line in f:
-                    if not line.startswith('#') and line is not '':
-                        key, val = line.replace(' ', '').split('=')
-                        config[key] = val.rstrip('\n')
-            except:
-                print("Configuration file parsing error")
+                    if not line.isspace() or not line.startswith('#'):
+                        try:
+                            key, val = line.replace(' ', '').split('=')
+                            config[key] = val.rstrip('\n')
+                        except Exception as e:
+                            print("Configuration file parsing error on line [{0}]: {1}".format(line, e))
+                            continue
 
     except FileNotFoundError:
         pass
