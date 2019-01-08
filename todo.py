@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+import os
 import sys
 import pickle
 import re
@@ -9,6 +10,8 @@ from enum import IntEnum
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
+from configparser import ConfigParser
+from argparse import ArgumentParser
 
 """ Define config and data file locations """
 config_location = str(Path.home()) + '/.config/py-todo/'
@@ -36,13 +39,6 @@ class Weekday(IntEnum):
 """ List of TodoItems, to be stored later in the datafile """
 items = []
 
-""" Create a dictionary storing program's configuration during runtime """
-config = {
-    'color': 'false',
-    'detail_mode': 'false',
-}
-
-
 class TodoItem:
     """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
 
@@ -65,7 +61,7 @@ class TodoItem:
             output_str = self.title + " ("
 
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
-            if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
+            if config['PY-TODO'].getboolean('detail_mode', fallback=False):
                 # By default, the first weekday is 'Sun' (last_weekday = Weekday.SATURDAY),
                 # Users are allowed to override it with 'Mon' (last_weekday = Weekday.SUNDAY).
                 if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
@@ -112,7 +108,7 @@ def maybe_color_str(message, color_fstr, predicate=lambda: True):
     :param predicate: A function deciding whether the message should be colored, alongside the config file
     :return: A colored string if the config indicated color
     """
-    if config['color'] in ['true', 'True']:
+    if config['PY-TODO'].getboolean('color', fallback=False):
         stripped_message = esc_seq_reg.sub('', message)
         return color_fstr.format(stripped_message) if predicate() else message
 
@@ -234,24 +230,23 @@ def scrape_date(line):
     return date
 
 
-def print_usage():
-    print()
-    print("Usage: " + sys.argv[0] + " <argument>\n"
-          "-a --add                                  -- Add a new item.\n"
-          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
-          "-e --edit <index>                         -- Edit an item.\n"
-          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
-          "-m --move <index> <new index>             -- Move an item from index to new index.\n"
-          "-r --remove <indices...>                  -- Remove items by their indices.\n"
-          "-l --list                                 -- List all items.\n"
-          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
-          "\n"
-          "-h --help                                 -- Display help message.\n"
-          "-v --version                              -- Display version info.\n"
-          "\n\n"
-          "Configuration Options (See " + config_location + config_name + "):\n"
-          "* color = true / false\n"
-          "* detail_mode = true / false\n")
+def usage():
+    return "\nUsage: " + sys.argv[0] + " <argument>\n" \
+          "-a --add                                  -- Add a new item.\n" \
+          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n" \
+          "-e --edit <index>                         -- Edit an item.\n" \
+          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n" \
+          "-m --move <index> <new index>             -- Move an item from index to new index.\n" \
+          "-r --remove <indices...>                  -- Remove items by their indices.\n" \
+          "-l --list                                 -- List all items.\n" \
+          "-org --orgfile <filename>                 -- Add org file TODOs.\n" \
+          "\n" \
+          "-h --help                                 -- Display help message.\n" \
+          "-v --version                              -- Display version info.\n" \
+          "\n\n" \
+          "Configuration Options (See " + config_location + config_name + "):\n" \
+          "* color = true / false\n" \
+          "* detail_mode = true / false\n" \
 
 
 def print_version():
@@ -267,30 +262,31 @@ if __name__ == '__main__':
     # mkdir -p on config_location and datafile_location.
     Path(config_location).mkdir(parents=True, exist_ok=True)
     Path(datafile_location).mkdir(parents=True, exist_ok=True)
-    
-    
+
     # Try to load user configuration.
-    try:
-        with open(config_location + config_name, 'r') as f:
-            for line in f:
-                # Make sure line isn't empty, whitespace, or a comment
-                if line and not line.isspace() and not line.startswith('#'):
-                    try:
-                        key, val = line.replace(' ', '').split('=')
-                        config[key] = val.rstrip('\n')
-                    except Exception as e:
-                        print("Configuration file parsing error on line [{0}]: {1}".format(line, e))
-                        continue
+    config = ConfigParser()
 
-    except FileNotFoundError:
-        pass
+    config['PY-TODO'] = {
+        'color': False,
+        'detail_mode': False
+    }
 
+    if not os.path.isfile(os.path.join(config_location, config_name)):
+        
+        with open(os.path.join(config_location, config_name), 'w+') as configfile:
+            config.write(configfile)
+    else:
+        config.read(os.path.join(config_location, config_name))
+ 
     # Try to unpickle todo list from the file.
     try:
         with open(datafile_location + datafile_name, 'rb') as f:
             items = pickle.load(f)
     except:
         pass
+
+    # Command line aargument parsing.
+    # parser = ArgumentParser(description=usage())
 
     # Command line argument parsing.
     if len(sys.argv) <= 1:
