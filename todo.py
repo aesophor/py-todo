@@ -106,8 +106,7 @@ def maybe_color_str(message, color_fstr, predicate=lambda: True):
     :param message: The message to possibly colorize
     :param color_fstr: The color format string
     :param predicate: A function deciding whether the message should be colored, alongside the config file
-    :return: A colored string if the config indicated color
-    """
+    :return: A colored string if the config indicated color """
     if config['PY-TODO'].getboolean('color', fallback=False):
         stripped_message = esc_seq_reg.sub('', message)
         return color_fstr.format(stripped_message) if predicate() else message
@@ -266,13 +265,15 @@ if __name__ == '__main__':
     # Try to load user configuration.
     config = ConfigParser()
 
+    # Default configuration
     config['PY-TODO'] = {
         'color': False,
         'detail_mode': False
     }
 
     if not os.path.isfile(os.path.join(config_location, config_name)):
-        
+
+        # If a config file doesn't exist, write the default one
         with open(os.path.join(config_location, config_name), 'w+') as configfile:
             config.write(configfile)
     else:
@@ -285,17 +286,14 @@ if __name__ == '__main__':
     except:
         pass
 
-    # Command line aargument parsing.
-    # parser = ArgumentParser(description=usage())
-
-    # Command line argument parsing.
+    # Command line argument parsing
     if len(sys.argv) <= 1:
         list_items()
 
-    elif sys.argv[1] == '-l' or sys.argv[1] == '--list':
+    elif sys.argv[1] in ['-l', '--list']:
         list_items()
 
-    elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
+    elif sys.argv[1] in ['-a', '--add']:
         try:
             title, exp_date_str = take_input(2, 3)
 
@@ -306,9 +304,9 @@ if __name__ == '__main__':
             # If the input is canceled, print a newline for prettiness, list the items and exit
             print()
             list_items()
-            sys.exit()
+            sys.exit(1)
 
-    elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
+    elif sys.argv[1] in ['-r', '--remove']:
         if len(sys.argv) >= 3:
             try:
                 indices = list(map(int, sys.argv[2:]))
@@ -317,9 +315,9 @@ if __name__ == '__main__':
             except:
                 print("Item does not exist.")
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == '-e' or sys.argv[1] == '--edit':
+    elif sys.argv[1] in ['-e', '--edit']:
         if len(sys.argv) >= 3:
             try:
                 item = items[int(sys.argv[2])]
@@ -338,9 +336,9 @@ if __name__ == '__main__':
                 list_items()
                 sys.exit()
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == "-m" or sys.argv[1] == "--move":
+    elif sys.argv[1] in ["-m", "--move"]:
         if len(sys.argv) == 4:
             try:
                 to_move = items[int(sys.argv[2])]
@@ -348,14 +346,14 @@ if __name__ == '__main__':
                 insert_todo_item(int(sys.argv[3]), to_move)
             except (IndexError, ValueError):
                 print("Item does not exist.")
-                sys.exit()
+                sys.exit(1)
 
             list_items()
 
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == '-org' or sys.argv[1] == '--orgfile':
+    elif sys.argv[1] in ['-org', '--orgfile']:
         keywords = []
         filename = str(sys.argv[2])
         # Open the orgfile
@@ -383,11 +381,11 @@ if __name__ == '__main__':
                             add_item(title, None)
         list_items()
 
-    elif sys.argv[1] == '-v' or sys.argv[1] == '--version':
+    elif sys.argv[1] in ['-v', '--version']:
         print_version()
 
     else:
-        print_usage()
+        print(usage())
 
     # Write all changes back to the file.
     with open(datafile_location + datafile_name, 'wb') as f:
