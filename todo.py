@@ -267,18 +267,20 @@ if __name__ == '__main__':
     # mkdir -p on config_location and datafile_location.
     Path(config_location).mkdir(parents=True, exist_ok=True)
     Path(datafile_location).mkdir(parents=True, exist_ok=True)
-
+    
+    
     # Try to load user configuration.
     try:
         with open(config_location + config_name, 'r') as f:
-                for line in f:
-                    if not line.isspace() or not line.startswith('#'):
-                        try:
-                            key, val = line.replace(' ', '').split('=')
-                            config[key] = val.rstrip('\n')
-                        except Exception as e:
-                            print("Configuration file parsing error on line [{0}]: {1}".format(line, e))
-                            continue
+            for line in f:
+                # Make sure line isn't empty, whitespace, or a comment
+                if line and not line.isspace() and not line.startswith('#'):
+                    try:
+                        key, val = line.replace(' ', '').split('=')
+                        config[key] = val.rstrip('\n')
+                    except Exception as e:
+                        print("Configuration file parsing error on line [{0}]: {1}".format(line, e))
+                        continue
 
     except FileNotFoundError:
         pass
