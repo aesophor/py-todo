@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+import os
 import sys
 import pickle
 import re
@@ -9,6 +10,8 @@ from enum import IntEnum
 from pathlib import Path
 from datetime import datetime
 from datetime import timedelta
+from configparser import ConfigParser
+from argparse import ArgumentParser
 
 """ Define config and data file locations """
 config_location = str(Path.home()) + '/.config/py-todo/'
@@ -36,13 +39,6 @@ class Weekday(IntEnum):
 """ List of TodoItems, to be stored later in the datafile """
 items = []
 
-""" Create a dictionary storing program's configuration during runtime """
-config = {
-    'color': 'false',
-    'detail_mode': 'false',
-}
-
-
 class TodoItem:
     """ A class definition for each todo item, which is defined with todo -a, and stored in the datafile """
 
@@ -65,7 +61,7 @@ class TodoItem:
             output_str = self.title + " ("
 
             # If in detail mode, annotate more explicitly (i.e. give the due weekday)
-            if 'detail_mode' in config and config['detail_mode'] in ['true', 'True']:
+            if config['PY-TODO'].getboolean('detail_mode', fallback=False):
                 # By default, the first weekday is 'Sun' (last_weekday = Weekday.SATURDAY),
                 # Users are allowed to override it with 'Mon' (last_weekday = Weekday.SUNDAY).
                 if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
@@ -110,9 +106,8 @@ def maybe_color_str(message, color_fstr, predicate=lambda: True):
     :param message: The message to possibly colorize
     :param color_fstr: The color format string
     :param predicate: A function deciding whether the message should be colored, alongside the config file
-    :return: A colored string if the config indicated color
-    """
-    if config['color'] in ['true', 'True']:
+    :return: A colored string if the config indicated color """
+    if config['PY-TODO'].getboolean('color', fallback=False):
         stripped_message = esc_seq_reg.sub('', message)
         return color_fstr.format(stripped_message) if predicate() else message
 
@@ -203,7 +198,7 @@ def take_input(title_pos, date_pos, default_title=None):
 def scrape_keywords(line):
     """Scrapes keywords from an orgfile
     :param line: The line to scrape
-    :returns: A (posibly empty) list of keywords
+    :returns: A (possibly empty) list of keywords
     """
     keywords = []
     todos = line.replace('#+TODO: ', '')
@@ -234,24 +229,23 @@ def scrape_date(line):
     return date
 
 
-def print_usage():
-    print()
-    print("Usage: " + sys.argv[0] + " <argument>\n"
-          "-a --add                                  -- Add a new item.\n"
-          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n"
-          "-e --edit <index>                         -- Edit an item.\n"
-          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n"
-          "-m --move <index> <new index>             -- Move an item from index to new index.\n"
-          "-r --remove <indices...>                  -- Remove items by their indices.\n"
-          "-l --list                                 -- List all items.\n"
-          "-org --orgfile <filename>                 -- Add org file TODOs.\n"
-          "\n"
-          "-h --help                                 -- Display help message.\n"
-          "-v --version                              -- Display version info.\n"
-          "\n\n"
-          "Configuration Options (See " + config_location + config_name + "):\n"
-          "* color = true / false\n"
-          "* detail_mode = true / false\n")
+def usage():
+    return "\nUsage: " + sys.argv[0] + " <argument>\n" \
+          "-a --add                                  -- Add a new item.\n" \
+          "-a --add <title> <date or days>           -- Add a new item with a title and expiry date provided.\n" \
+          "-e --edit <index>                         -- Edit an item.\n" \
+          "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n" \
+          "-m --move <index> <new index>             -- Move an item from index to new index.\n" \
+          "-r --remove <indices...>                  -- Remove items by their indices.\n" \
+          "-l --list                                 -- List all items.\n" \
+          "-org --orgfile <filename>                 -- Add org file TODOs.\n" \
+          "\n" \
+          "-h --help                                 -- Display help message.\n" \
+          "-v --version                              -- Display version info.\n" \
+          "\n\n" \
+          "Configuration Options (See " + config_location + config_name + "):\n" \
+          "* color = true / false\n" \
+          "* detail_mode = true / false\n" \
 
 
 def print_version():
@@ -269,15 +263,23 @@ if __name__ == '__main__':
     Path(datafile_location).mkdir(parents=True, exist_ok=True)
 
     # Try to load user configuration.
-    try:
-        with open(config_location + config_name, 'r') as f:
-            for line in f:
-                if not line.startswith('#'):
-                    key, val = line.replace(' ', '').split('=')
-                    config[key] = val.rstrip('\n')
-    except FileNotFoundError:
-        pass
+    config = ConfigParser()
 
+    # Default configuration
+    config['PY-TODO'] = {
+        'color': False,
+        'detail_mode': False,
+        'week_start_day': 'Sun'
+    }
+
+    if not os.path.isfile(os.path.join(config_location, config_name)):
+
+        # If a config file doesn't exist, write the default one
+        with open(os.path.join(config_location, config_name), 'w+') as configfile:
+            config.write(configfile)
+    else:
+        config.read(os.path.join(config_location, config_name))
+ 
     # Try to unpickle todo list from the file.
     try:
         with open(datafile_location + datafile_name, 'rb') as f:
@@ -285,14 +287,14 @@ if __name__ == '__main__':
     except:
         pass
 
-    # Command line argument parsing.
+    # Command line argument parsing
     if len(sys.argv) <= 1:
         list_items()
 
-    elif sys.argv[1] == '-l' or sys.argv[1] == '--list':
+    elif sys.argv[1] in ['-l', '--list']:
         list_items()
 
-    elif sys.argv[1] == '-a' or sys.argv[1] == '--add':
+    elif sys.argv[1] in ['-a', '--add']:
         try:
             title, exp_date_str = take_input(2, 3)
 
@@ -303,9 +305,9 @@ if __name__ == '__main__':
             # If the input is canceled, print a newline for prettiness, list the items and exit
             print()
             list_items()
-            sys.exit()
+            sys.exit(1)
 
-    elif sys.argv[1] == '-r' or sys.argv[1] == '--remove':
+    elif sys.argv[1] in ['-r', '--remove']:
         if len(sys.argv) >= 3:
             try:
                 indices = list(map(int, sys.argv[2:]))
@@ -314,9 +316,9 @@ if __name__ == '__main__':
             except:
                 print("Item does not exist.")
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == '-e' or sys.argv[1] == '--edit':
+    elif sys.argv[1] in ['-e', '--edit']:
         if len(sys.argv) >= 3:
             try:
                 item = items[int(sys.argv[2])]
@@ -335,9 +337,9 @@ if __name__ == '__main__':
                 list_items()
                 sys.exit()
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == "-m" or sys.argv[1] == "--move":
+    elif sys.argv[1] in ["-m", "--move"]:
         if len(sys.argv) == 4:
             try:
                 to_move = items[int(sys.argv[2])]
@@ -345,14 +347,14 @@ if __name__ == '__main__':
                 insert_todo_item(int(sys.argv[3]), to_move)
             except (IndexError, ValueError):
                 print("Item does not exist.")
-                sys.exit()
+                sys.exit(1)
 
             list_items()
 
         else:
-            print_usage()
+            print(usage())
 
-    elif sys.argv[1] == '-org' or sys.argv[1] == '--orgfile':
+    elif sys.argv[1] in ['-org', '--orgfile']:
         keywords = []
         filename = str(sys.argv[2])
         # Open the orgfile
@@ -380,11 +382,11 @@ if __name__ == '__main__':
                             add_item(title, None)
         list_items()
 
-    elif sys.argv[1] == '-v' or sys.argv[1] == '--version':
+    elif sys.argv[1] in ['-v', '--version']:
         print_version()
 
     else:
-        print_usage()
+        print(usage())
 
     # Write all changes back to the file.
     with open(datafile_location + datafile_name, 'wb') as f:
