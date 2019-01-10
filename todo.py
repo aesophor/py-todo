@@ -268,7 +268,8 @@ if __name__ == '__main__':
     # Default configuration
     config['PY-TODO'] = {
         'color': False,
-        'detail_mode': False
+        'detail_mode': False,
+        'week_start_day': 'Sun'
     }
 
     if not os.path.isfile(os.path.join(config_location, config_name)):
