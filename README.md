@@ -77,6 +77,7 @@ Special thanks to all the contributors! (In lexicographical order)
 * [Arsukeey](https://github.com/Arsukeey) - Added Detail Mode (e.g., Next Wednesday)
 * [christophergeiger3](https://github.com/christophergeiger3) - Reformatted code
 * [diplozoon](https://github.com/diplozoon) - Reformatted code
+* [jonaylor89](https://github.com/jonaylor89) - More robust config parsing
 * [luvhalvorson](https://github.com/luvhalvorson) - Updated README.md
 * [MMarinov97](https://github.com/MMarinov97) - Added compatibility with emacs org file
 * [patatman](https://github.com/patatman) - Improved -a --add. Tested py-todo on MacOS
