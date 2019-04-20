@@ -61,8 +61,10 @@ $ todo -org <filename>                   # Adds TODOs from Emacs org mode
 The default config location is `~/.config/py-todo/config`
 
 ```
+[PY-TODO]
 color = true / false
 detail_mode = true / false
+week_start_day = Sun
 ```
 
 ## Detail Mode
