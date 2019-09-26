@@ -61,6 +61,8 @@ class TodoItem:
             return self.title + " (Today)"  # Annotate as the current day
         elif days_left == 1:
             return self.title + " (Tomorrow)"  # Annotate as tomorrow
+        elif days_left == -1:
+            return self.title + " (Yesterday)"  # Annotate as Yesterday
         elif days_left > 1:
             output_str = self.title + " ("
 
@@ -95,8 +97,30 @@ class TodoItem:
                         this_or_next="This" if weeks_left == 0 else "Next",
                         weekday=self.exp_date.strftime("%A"))
             return output_str + "{days_left} days left)".format(days_left=days_left)
+        elif days_left < -1:
+            # For dealing with Past-Due Stuffs
+            output_str = self.title + " ("
+
+            # Take absolute value
+            days_left=abs(days_left)
+            # Check for detail mode
+            if config['PY-TODO'].getboolean('detail_mode', fallback=False):
+
+                if 'week_start_day' in config and config['week_start_day'].lower() in ['sun', 'mon'] and config['week_start_day'].lower() == 'mon':
+                    last_weekday = 1    # Sunday
+                else:
+                    last_weekday = 2    # Saturday
+                days_to_prev_week = datetime.today().weekday() + last_weekday
+                weeks_left = ceil((days_left - days_to_prev_week) / 7)
+
+                if weeks_left == 0 or weeks_left == 1:
+                    output_str += "{this_or_next}{weekday}; ".format(
+                        this_or_next="Last " if weeks_left == 1 else "",
+                        weekday=self.exp_date.strftime("%A"))
+
+            return output_str + "{days_left} days ago)".format(days_left=days_left)
         else:
-            return self.title + " (DUE!)"
+            return self.title + " ERROR"
 
     def __eq__(self, other):
         """ Override default equality """
@@ -160,6 +184,7 @@ def list_items():
                 date = maybe_color_str(date, due_color, lambda: True if "DUE" in date else False)
                 date = maybe_color_str(date, date_color, lambda: True if "DUE" not in date else False)
                 date = maybe_color_str(date, today_color, lambda: True if "Today" in date else False)
+                date = maybe_color_str(date, due_color, lambda: True if "ago" in date else False) # Support for Past-Due Stuffs
 
                 print(maybe_colored_index + item.title + " " + date)
             else:
@@ -403,3 +428,4 @@ if __name__ == '__main__':
     # Write all changes back to the file.
     with open(datafile_location + datafile_name, 'wb') as f:
         pickle.dump(items, f)
+
