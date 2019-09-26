@@ -270,6 +270,7 @@ def usage():
           "-e --edit <index> <title> <date or days>  -- Edit an item with a title and expiry date provided.\n" \
           "-m --move <index> <new index>             -- Move an item from index to new index.\n" \
           "-r --remove <indices...>                  -- Remove items by their indices.\n" \
+          "-s --sort                                 -- Sort items by their remaining days.\n" \
           "-l --list                                 -- List all items.\n" \
           "-org --orgfile <filename>                 -- Add org file TODOs.\n" \
           "\n" \

@@ -50,6 +50,7 @@ $ todo -a                                # Add an item. (with Title / Expiry Dat
 $ todo -a <title> <expiry_date>          # Add an item. (without Title / Expiry Date prompt)
 $ todo -e <index>                        # Edit an item. (with Title / Expiry Date prompt)
 $ todo -e <index> <title> <expiry_date>  # Edit an item. (without Title / Expiry Date prompt)
+$ todo -l --list                         # List all items.
 $ todo -m --move <index> <new index>     # Move an item from index to new index.
 $ todo -r <indices>                      # Remove one or more items.
 $ todo -s --sort                         # Sort items by their remaining days
