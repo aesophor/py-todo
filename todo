@@ -167,31 +167,32 @@ def sort_items():
 
 def list_items():
     """ Iterate through each TodoItem in the items list and print it """
-    if len(items) > 0:
-        print("You have {item_count} item{s} left on the reminder!".format(
-            item_count=len(items), s="s" if len(items) >= 2 else ""))
-
-        for index, item in enumerate(items):
-            item_str = str(item)
-            index = str(index)
-
-            maybe_colored_index = maybe_color_str(index + ") ", index_color)
-
-            if '(' in item_str:
-                date = item_str[item_str.index('('):]  # Slice of str from the first occurrence of "(" (inclusive)
-
-                # The date could possibly be either color, so no harm in calling maybe_color_str multiple times
-                date = maybe_color_str(date, due_color, lambda: True if "DUE" in date else False)
-                date = maybe_color_str(date, date_color, lambda: True if "DUE" not in date else False)
-                date = maybe_color_str(date, today_color, lambda: True if "Today" in date else False)
-                date = maybe_color_str(date, due_color, lambda: True if "Yesterday" in date else False)
-                date = maybe_color_str(date, due_color, lambda: True if "ago" in date else False) # Support for Past-Due Stuffs
-
-                print(maybe_colored_index + item.title + " " + date)
-            else:
-                print(maybe_colored_index + item_str)
-    else:
+    if len(items) == 0:
         print("No items left on the reminder.")
+        return
+
+    print("You have {item_count} item{s} left on the reminder!".format(
+        item_count=len(items), s="s" if len(items) >= 2 else ""))
+
+    for index, item in enumerate(items):
+        item_str = str(item)
+        index = str(index)
+
+        maybe_colored_index = maybe_color_str(index + ") ", index_color)
+
+        if '(' in item_str:
+            date = item_str[item_str.index('('):]  # Slice of str from the first occurrence of "(" (inclusive)
+
+            # The date could possibly be either color, so no harm in calling maybe_color_str multiple times
+            date = maybe_color_str(date, due_color, lambda: True if "DUE" in date else False)
+            date = maybe_color_str(date, date_color, lambda: True if "DUE" not in date else False)
+            date = maybe_color_str(date, today_color, lambda: True if "Today" in date else False)
+            date = maybe_color_str(date, due_color, lambda: True if "Yesterday" in date else False)
+            date = maybe_color_str(date, due_color, lambda: True if "ago" in date else False) # Support for Past-Due Stuffs
+
+            print(maybe_colored_index + item.title + " " + date)
+        else:
+            print(maybe_colored_index + item_str)
 
 
 def parse_date_str(exp_date_str):
