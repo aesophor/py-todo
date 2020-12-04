@@ -183,7 +183,7 @@ def list_items():
         if '(' not in item_str:
             print(maybe_colored_index + item_str)
         else:
-            date = item_str[item_str.index('('):]  # Slice of str from the first occurrence of "(" (inclusive)
+            date = item_str[item_str.rindex('('):]  # Slice of str from the last occurrence of "(" (inclusive)
 
             # The date could possibly be either color, so no harm in calling maybe_color_str multiple times
             date = maybe_color_str(date, due_color, lambda: True if "DUE" in date else False)
