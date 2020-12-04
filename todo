@@ -180,7 +180,9 @@ def list_items():
 
         maybe_colored_index = maybe_color_str(index + ") ", index_color)
 
-        if '(' in item_str:
+        if '(' not in item_str:
+            print(maybe_colored_index + item_str)
+        else:
             date = item_str[item_str.index('('):]  # Slice of str from the first occurrence of "(" (inclusive)
 
             # The date could possibly be either color, so no harm in calling maybe_color_str multiple times
@@ -191,8 +193,6 @@ def list_items():
             date = maybe_color_str(date, due_color, lambda: True if "ago" in date else False) # Support for Past-Due Stuffs
 
             print(maybe_colored_index + item.title + " " + date)
-        else:
-            print(maybe_colored_index + item_str)
 
 
 def parse_date_str(exp_date_str):
