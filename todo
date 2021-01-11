@@ -62,15 +62,17 @@ class TodoItem:
         # Set the amount of days left as the timedelta from today to the expiration date, in days.
         days_left = self.days_left
 
-        # Get the exact Time of the item
-        exp_time = self.exp_time()
+        exp_time = ""
+        if config['PY-TODO'].getboolean('show_time', fallback=False) and self.exp_time() != '00:00:00':
+            # Get the exact Time of the item
+            exp_time = " " + self.exp_time()
 
         if days_left == 0:
-            return self.title + " (Today " + exp_time + ")"  # Annotate as the current day
+            return self.title + " (Today" + exp_time + ")"  # Annotate as the current day
         elif days_left == 1:
-            return self.title + " (Tomorrow " + exp_time + ")"  # Annotate as tomorrow
+            return self.title + " (Tomorrow" + exp_time + ")"  # Annotate as tomorrow
         elif days_left == -1:
-            return self.title + " (Yesterday " + exp_time + ")"  # Annotate as Yesterday
+            return self.title + " (Yesterday" + exp_time + ")"  # Annotate as Yesterday
         elif days_left > 1:
             output_str = self.title + " ("
 
@@ -313,7 +315,8 @@ if __name__ == '__main__':
     config['PY-TODO'] = {
         'color': False,
         'detail_mode': False,
-        'week_start_day': 'Sun'
+        'week_start_day': 'Sun',
+        'show_time': False
     }
 
     if not os.path.isfile(os.path.join(config_location, config_name)):
