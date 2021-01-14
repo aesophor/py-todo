@@ -8,6 +8,7 @@ import re
 from math import ceil
 from enum import IntEnum
 from pathlib import Path
+from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from configparser import ConfigParser
@@ -46,9 +47,13 @@ class TodoItem:
         self.title = title
         self.exp_date = exp_date
 
+
     @property
     def days_left(self):
-        return 999 if self.exp_date is None else (self.exp_date - datetime.today()).days + 1
+        return 999 if self.exp_date is None else (self.exp_date.date() - date.today()).days
+
+    def exp_time(self):
+        return str(datetime.time(self.exp_date))
 
     def __str__(self):
         if self.exp_date is None:
@@ -57,12 +62,17 @@ class TodoItem:
         # Set the amount of days left as the timedelta from today to the expiration date, in days.
         days_left = self.days_left
 
+        exp_time = ""
+        if config['PY-TODO'].getboolean('show_time', fallback=False) and self.exp_time() != '00:00:00':
+            # Get the exact Time of the item
+            exp_time = " " + self.exp_time()
+
         if days_left == 0:
-            return self.title + " (Today)"  # Annotate as the current day
+            return self.title + " (Today" + exp_time + ")"  # Annotate as the current day
         elif days_left == 1:
-            return self.title + " (Tomorrow)"  # Annotate as tomorrow
+            return self.title + " (Tomorrow" + exp_time + ")"  # Annotate as tomorrow
         elif days_left == -1:
-            return self.title + " (Yesterday)"  # Annotate as Yesterday
+            return self.title + " (Yesterday" + exp_time + ")"  # Annotate as Yesterday
         elif days_left > 1:
             output_str = self.title + " ("
 
@@ -225,7 +235,7 @@ def take_input(title_pos, date_pos, default_title=None):
     else:
         title = sys.argv[title_pos] if len(sys.argv) > title_pos else input("Title: ")
 
-    exp_date_str = sys.argv[date_pos] if len(sys.argv) > date_pos else input("Expiry date (YYYY/MM/DD or <days>d) (Optional): ")
+    exp_date_str = sys.argv[date_pos] if len(sys.argv) > date_pos else input("Expiry date (YYYY/MM/DD or <days>d or YYYY/MM/DD/HH/MM/SS) (Optional): ")
 
     return title if title else default_title, exp_date_str
 
@@ -305,7 +315,8 @@ if __name__ == '__main__':
     config['PY-TODO'] = {
         'color': False,
         'detail_mode': False,
-        'week_start_day': 'Sun'
+        'week_start_day': 'Sun',
+        'show_time': False
     }
 
     if not os.path.isfile(os.path.join(config_location, config_name)):
