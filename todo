@@ -437,7 +437,6 @@ if __name__ == '__main__':
             else:
                 if not keywords:
                     keywords.append('TODO')
-                    keywords.append('DONE')
                 for word in keywords:
                     # Search in each line and format if match
                     if word in line and line.startswith('*'):
