@@ -437,10 +437,9 @@ if __name__ == '__main__':
             else:
                 if not keywords:
                     keywords.append('TODO')
-                    keywords.append('DONE')
                 for word in keywords:
                     # Search in each line and format if match
-                    if word in line and '*' in line:
+                    if word in line and line.startswith('*'):
                         title = strip_line(line, word)
                         try:
                             if ': <' in content[index + 1]:
