@@ -234,7 +234,7 @@ def parse_date_str(exp_date_str):
             return datetime(*map(int, exp_date_str.split('/')))
     except:
         print("An error occurred while parsing your date.")
-        sys.exit()
+        sys.exit(1)
 
 
 def take_input(title_pos, date_pos, default_title=None):
